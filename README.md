@@ -16,7 +16,10 @@ All reports are to be submitted through [Gradescope](https://www.gradescope.com/
 > - Submission details for each question
 > - Page limits
 
-## Background
+
+## Directed Portion
+
+### Step 1: Gemmini Overview
 
 Gemmini is a hardware accelerator that is part of the Chipyard ecosystem that we have been using throughout the previous labs of this course. You have previously seen Rocket Core (Berkeley's single-issue, in-order RISC-V processor) and BOOM (Berkeley's Out of Order RISC-V Core), both of which are RISC-V CPU architectures. By contrast, Gemmini is based around a systolic array architecture. 
 
@@ -40,7 +43,7 @@ Systolic arrays are good for kernels like matrix multiplication, as they have hi
   <a href="https://medium.com/lightmatter/matrix-processing-with-nanophotonics-998e294dabc1">Source</a>
 </p>
 
-## Setup
+### Part 2: Setting up Chipyard
 To get started, clone the lab chipyard repo:
 ```bash
 cd /scratch/${USER} 
@@ -64,9 +67,7 @@ TESTDIR=${GEMDIR}/software/gemmini-rocc-tests/bareMetalC/
 BINDIR=${GEMDIR}/software/gemmini-rocc-tests/build/bareMetalC/
 ```
 
-## Directed Portion
-
-### Part 1: Setting up Gemmini
+### Part 3: Building Basic Tests on Gemmini
 To start developing and running simulations on Gemmini, first build the Gemmini software tests.
 
 ```bash
@@ -116,8 +117,6 @@ Now, answer these questions in your lab report. You may want to look at the C he
 >
 > **Question 4** What function could we use to preload the array with a value (e.g. load the array with 15)?
 
-
-### Part 2: Building Basic Tests on Gemmini
 Now, you will modify the template code and rerun your tests. Follow the below steps to develop and build new bareMetalC tests (adopted from the gemmini-rocc-tests [README](https://github.com/ucb-bar/gemmini-rocc-tests?tab=readme-ov-file#writing-your-own-gemmini-tests)).
 
 1. First, make a copy of the template C file and call it `double.c`
@@ -150,5 +149,16 @@ Once your test passes, answer the following questions in your lab report.
 > **Question 5.** Attach a diff of your `double.c` file compared to the `template.c` file, as well as a diff of the `gemmini_testutils.h` file if you modified it. You can use `diff template.c double.c` and `git diff gemmini_testutils.h`, respectively, to get the diffs.
 
 
+### Part 3: Tranium Overview
+Now, we will switch to work on AWS Tranium. While the architectures are similar (both have a systolic array as the main compute engine), Tranium is magnitudes more powerful than what Gemmini is capable of doing, as it is a datacenter-scale chip and not just for research purposes. Nonetheless, we encourage you to explore Gemmini further on your own time after this lab.
 
+TODO: Add Tranium explanation here
 
+### Part 4: Tranium Setup
+To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
+
+### Part 5: VVADD on Tranium
+TODO
+
+## Open-Ended Portion
+TODO
