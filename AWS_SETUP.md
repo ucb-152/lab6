@@ -142,8 +142,25 @@ ssh trn1_cs152
 
 5. Finally, click the orange "Create Budget" button.
 
+## Step 5: Apply AWS Credits
+Now, we will apply the AWS credits (shoutout to AWS for their generosity!) you should have recieved in an email with the subject "[CS152] SP25 Lab 6 AWS Credit Code."
 
-## Step 5: Shutdown your instance
+1. First, copy the AWS Promotion Code. It should be a 15 symbols long with numbers and letters, starting with "PC"
+
+2. Go to ["Billing and Cost Management"](https://us-east-1.console.aws.amazon.com/costmanagement/home?region=us-east-2#/home). Click on "Credits" on the left side of the screen.
+
+3. Click the orange "Redeem credit" button in the top-right of the screen.
+
+4. Enter the Promotion Code you copied earlier, and hit "Redeem credit" 
+
+5. Confirm the credit was applied. You should see in the "Credits" section a new entry, with the name "Berkeley CS152 Professor Christopher Fletcher", "Amount used" $0.00, and "Amount remaining" $50.00.
+
+<p align="center">
+  <img width="70%" src="./img/aws_setup/10_credit_info.png">
+</p>
+
+
+## Step 6: Shutdown your instance
 Congrats! You have finished the setup steps for launching an AWS Tranium EC2 instance. Go back to your Instances, click on your trn1_cs152 instance, click the "Instance State" dropdown, and click "Stop instance."
 
 > [!IMPORTANT] 
