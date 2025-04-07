@@ -143,7 +143,7 @@ ssh trn1_cs152
 5. Finally, click the orange "Create Budget" button.
 
 ## Step 5: Apply AWS Credits
-Now, we will apply the AWS credits (shoutout to AWS for their generosity!) you should have recieved in an email with the subject "[CS152] SP25 Lab 6 AWS Credit Code."
+Now, we will apply the AWS credits (shoutout to AWS for their generosity!). You should have recieved in an email with the subject "[CS152] SP25 Lab 6 AWS Credit Code."
 
 1. First, copy the AWS Promotion Code. It should be a 15 symbols long with numbers and letters, starting with "PC"
 
