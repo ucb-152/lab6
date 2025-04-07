@@ -4,9 +4,9 @@ This document will help you launch a Tranium EC2 instance, configure SSH groups 
 ## Step 1: Launch Instance
 The first step is to launch a Tranium EC2 instance.
 
-1. First, log into [AWS Console us-west-2](https://us-west-2.console.aws.amazon.com/ec2/home?region=us-west-2#Home:).
-2. Click the orange "Launch Instance" button.
-3. Fill in the following information for your instance:
+1. First, log into [AWS Console us-east-2](https://us-east-2.console.aws.amazon.com/console/home?region=us-east-2#). You can click "Sign in using root user email" and sign in that way if needed.
+2. Go the [EC2 service](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Overview:) (Elastic Compute Cloud) and click the orange "Launch Instance" button.
+3. Fill in the following information for your instance. When you select the OS Type, you may get a pop up warning "Some of your current settings will be changed or removed if you proceed". You can ignore this and click the orange "Confirm changes" button.
     - Name: trn1_cs152
     - OS Type: Ubuntu
     - AMI: Deep Learning AMI Neuron (Ubuntu 22.04)
@@ -39,16 +39,33 @@ chmod 400 ~/.ssh/trn1_cs152.pem
   <img width="400" src="./img/aws_setup/3_key_security_group.png">
 </p>
 
-6. Finally, on the right side of the screen where it says "Summary",
+6. Scroll down further to the "Configure storage" settings, and set it to 150 GiB or gp3 storage.
+<p align="center">
+  <img width="400" src="./img/aws_setup/3_1_storage_settings.png">
+</p>
+
+
+7. Finally, on the right side of the screen where it says "Summary",
 confirm the information is correct, and launch your instance!
 
 <p align="center">
   <img width="400" src="./img/aws_setup/4_summary_launch.png">
 </p>
 
+### Potential Errors:
+
+#### Resource Request Validation:
+You may get an error saying your "Instance launch failed" due to request for accessing resources needing validation. This usually gets resolved within 5 minutes, and once you get the email saying that your request has been validated, click the orange button saying "Retry failed tasks."
+
+<p align="center">
+  <img width="400" src="./img/aws_setup/4_1_launch_fail.png">
+</p>
+
+#### vCPU Capacity Limit
+If you get an error saying your "Instance launch failed" due to requesting more vCPU capacity than your current vCPU limit of 0, make sure you fill out the [Google Form on Ed](https://edstem.org/us/courses/74390/discussion/6388697) to get permissions to launch Tranium instances. Email ronitnag04@berkeley.edu once you fill out the form, with the email subject "[CS152] SP25 Lab 6 AWS Google Form Submitted".
 
 ## Step 2: Setup Elastic IPs
-This next step is to set up an Elastic IP for your instance. By default, the IPv4 associated with an instance changes each time you launch it. By allocating an Elastic IP and associating it with the instance, we avoid having to change your ssh config each time. 
+This next step is to set up an Elastic IP for your instance. By default, the IPv4 associated with an instance changes each time you launch it. This is quite annoying since you will need to stop and start the instance constantly to save costs and credit usage. By allocating an Elastic IP and associating it with the instance, we avoid having to change your SSH config each time. 
 1. After clicking "Launch Instance" from the previous step, you should have landed back in the EC2 dashboard. Scroll down on the left side of the screen until you get to "Network & Security" settings, and click on Elastic IPs.
 2. Click the orange "Allocate Elastic IP address" button in the top-right corner of the screen
 3. Click the orange "Allocate" button. Now, you have an Elastic IP to use.
@@ -68,7 +85,7 @@ This next step is to set up an Elastic IP for your instance. By default, the IPv
 This step is to ensure you have SSH access from your local computer to the Trn1 EC2 instance.
 
 1. After clicking "Associate" from the previous step, you should have landed back in the Elastic IP dashboard. Scroll up on the left side of the screen until you get to "Instances" settings, and click on Instances.
-2. Click on the checkbox next to your trn1_cs152 instance. Scroll down to the "Details" section and copy the Public IPv4 DNS. It should look like this: ec2-###-###-###-###.us-west-2.compute.amazonaws.com.
+2. Click on the checkbox next to your trn1_cs152 instance. Scroll down to the "Details" section and copy the Public IPv4 DNS. It should look like this: `ec2-###-###-###-###.us-east-2.compute.amazonaws.com` (where the # symbols are numbers).
 
 <p align="center">
   <img width="400" src="./img/aws_setup/7_get_dns.png">
@@ -78,7 +95,7 @@ This step is to ensure you have SSH access from your local computer to the Trn1 
 3. Add the following SSH configuration to your local computer `.ssh/config`. Replace the HostName with the DNS you just copied.
 ```
 Host trn1_cs152
-    HostName ec2-###-###-###-###.us-west-2.compute.amazonaws.com
+    HostName ec2-###-###-###-###.us-east-2.compute.amazonaws.com
     User ubuntu
     IdentityFile ~/.ssh/trn1_cs152.pem
 ```
@@ -94,6 +111,13 @@ ssh trn1_cs152
 
 1. Go back to your instances dashboard on AWS console. Click on the "+" sign next to View Alarms for your trn1_cs152 instance.
 2. Configure your alarm as shown in the picture below, and click Create
+    - Toggle "Alarm Action" on, and Select "Stop"
+    - Group samples by: Maximum
+    - Type of data to sample: CPU Utilization
+    - Alarm when: <=
+    - Percent: 1
+    - Consecutive periods: 3
+    - Period: 5 minutes
 
 <p align="center">
   <img width="400" src="./img/aws_setup/8_alarm_details.png">
@@ -101,6 +125,9 @@ ssh trn1_cs152
 
 3. Search "Budgets" in the top search bar, and in the "Features" section, click on "Budgets". Click on the orange "Create a Budget" button. 
 4. Fill in the information to match the picture below, and enter your email for the "Email recipients" section.
+    - Select the "Monthly Cost Budget" template
+    - Set "Enter your budgeted amount ($)" to 50
+    - Enter your email in the "Email recipients" box
 
 <p align="center">
   <img width="400" src="./img/aws_setup/9_budget_details.png">
