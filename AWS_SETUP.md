@@ -58,11 +58,16 @@ confirm the information is correct, and launch your instance!
 You may get an error saying your "Instance launch failed" due to request for accessing resources needing validation. This usually gets resolved within 5 minutes, and once you get the email saying that your request has been validated, click the orange button saying "Retry failed tasks."
 
 <p align="center">
-  <img width="400" src="./img/aws_setup/4_1_launch_fail.png">
+  <img width="400" src="./img/aws_setup/4_1_launch_fail_validation.png">
 </p>
 
 #### vCPU Capacity Limit
 If you get an error saying your "Instance launch failed" due to requesting more vCPU capacity than your current vCPU limit of 0, make sure you fill out the [Google Form on Ed](https://edstem.org/us/courses/74390/discussion/6388697) to get permissions to launch Tranium instances. Email ronitnag04@berkeley.edu once you fill out the form, with the email subject "[CS152] SP25 Lab 6 AWS Google Form Submitted".
+
+<p align="center">
+  <img width="400" src="./img/aws_setup/4_1_launch_fail_vcpu.png">
+</p>
+
 
 ## Step 2: Setup Elastic IPs
 This next step is to set up an Elastic IP for your instance. By default, the IPv4 associated with an instance changes each time you launch it. This is quite annoying since you will need to stop and start the instance constantly to save costs and credit usage. By allocating an Elastic IP and associating it with the instance, we avoid having to change your SSH config each time. 
