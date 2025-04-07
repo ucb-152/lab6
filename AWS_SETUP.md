@@ -12,7 +12,7 @@ The first step is to launch a Tranium EC2 instance.
     - AMI: Deep Learning AMI Neuron (Ubuntu 22.04)
     - Instance Type: trn1.2xlarge
 <p align="center">
-  <img width="80%" src="./img/aws_setup/1_instance_info.png">
+  <img width="40%" src="./img/aws_setup/1_instance_info.png">
 </p>
 
 4. Scroll down, and click create new key pair. Select the following for your key pair details:
@@ -20,7 +20,7 @@ The first step is to launch a Tranium EC2 instance.
     - Key pair type: ED25519
     - Private key file format: .pem
 <p align="center">
-  <img width="80%" src="./img/aws_setup/2_key_setup.png">
+  <img width="30%" src="./img/aws_setup/2_key_setup.png">
 </p>
 
 Click "Create key pair", and the `trn1_cs152.pem` file will be downloaded to your local computer. Once the key is downloaded, move it to your `~/.ssh` directory, and make sure to set the permissions to read-only for the owner (400 sets r-- --- --- permissions for the file). 
@@ -36,12 +36,12 @@ chmod 400 ~/.ssh/trn1_cs152.pem
     - Select "Anywhere 0.0.0.0/0"
 
 <p align="center">
-  <img width="80%" src="./img/aws_setup/3_key_security_group.png">
+  <img width="40%" src="./img/aws_setup/3_key_security_group.png">
 </p>
 
 6. Scroll down further to the "Configure storage" settings, and set it to 150 GiB or gp3 storage.
 <p align="center">
-  <img width="80%" src="./img/aws_setup/3_1_storage_settings.png">
+  <img width="40%" src="./img/aws_setup/3_1_storage_settings.png">
 </p>
 
 
@@ -49,7 +49,7 @@ chmod 400 ~/.ssh/trn1_cs152.pem
 confirm the information is correct, and launch your instance!
 
 <p align="center">
-  <img width="80%" src="./img/aws_setup/4_summary_launch.png">
+  <img width="30%" src="./img/aws_setup/4_summary_launch.png">
 </p>
 
 ### Potential Errors:
@@ -76,14 +76,14 @@ This next step is to set up an Elastic IP for your instance. By default, the IPv
 3. Click the orange "Allocate" button. Now, you have an Elastic IP to use.
 4. Rename the Elastic IP to trn1_cs152
 <p align="center">
-  <img width="80%" src="./img/aws_setup/5_name_ip.png">
+  <img width="60%" src="./img/aws_setup/5_name_ip.png">
 </p>
 
 5. Make sure the trn1_cs152 Elastic IP is selected (blue checkbox on the left of the name), and click the "Actions" dropdown menu in the top right of the screen.
 
 6. Select "Associate Elastic IP address." Click on the "Instance" selection, and select the trn1_cs152 instance. Click the orange "Associate" button. 
 <p align="center">
-  <img width="80%" src="./img/aws_setup/6_select_instance_associate.png">
+  <img width="60%" src="./img/aws_setup/6_select_instance_associate.png">
 </p>
 
 ## Step 3: Setup SSH
@@ -93,7 +93,7 @@ This step is to ensure you have SSH access from your local computer to the Trn1 
 2. Click on the checkbox next to your trn1_cs152 instance. Scroll down to the "Details" section and copy the Public IPv4 DNS. It should look like this: `ec2-###-###-###-###.us-east-2.compute.amazonaws.com` (where the # symbols are numbers).
 
 <p align="center">
-  <img width="80%" src="./img/aws_setup/7_get_dns.png">
+  <img width="60%" src="./img/aws_setup/7_get_dns.png">
 </p>
 
 
@@ -125,7 +125,7 @@ ssh trn1_cs152
     - Period: 5 minutes
 
 <p align="center">
-  <img width="80%" src="./img/aws_setup/8_alarm_details.png">
+  <img width="60%" src="./img/aws_setup/8_alarm_details.png">
 </p>
 
 3. Search "Budgets" in the top search bar, and in the "Features" section, click on "Budgets". Click on the orange "Create a Budget" button. 
@@ -135,7 +135,7 @@ ssh trn1_cs152
     - Enter your email in the "Email recipients" box
 
 <p align="center">
-  <img width="80%" src="./img/aws_setup/9_budget_details.png">
+  <img width="60%" src="./img/aws_setup/9_budget_details.png">
 </p>
 
 5. Finally, click the orange "Create Budget" button.
