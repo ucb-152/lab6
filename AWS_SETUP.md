@@ -112,7 +112,9 @@ ssh trn1_cs152
 ## Step 4: Setup Auto-Shutdown and Budget
 > [!IMPORTANT] 
 > 
-> This final step is very important! We will set up alarms, auto-shutdown, and budget notifications to make sure you don't burn through your credits accidentally and get your credit card charged.
+> This final step is very important! We will set up alarms, auto-shutdown, and budget notifications to make sure you don't burn through your credits accidentally and get your credit card charged. 
+>
+> Note that even with these safeguards, **it is still your responsibility to make sure your instance is shutdown** in case the auto-shutdown fails. We can help resolve credit overages, payment, and billing issues before the monthly billing cycle, but once a payment is charged to your card (at then end of the month), we have no way of retroactively refunding the charge.
 
 1. Go back to your instances dashboard on AWS console. Click on the "+" sign next to View Alarms for your trn1_cs152 instance.
 2. Configure your alarm as shown in the picture below, and click Create
