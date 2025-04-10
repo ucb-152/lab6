@@ -117,7 +117,7 @@ ssh trn1_cs152
 > Note that even with these safeguards, **it is still your responsibility to make sure your instance is shutdown** in case the auto-shutdown fails. We can help resolve credit overages, payment, and billing issues before the monthly billing cycle, but once a payment is charged to your card (at then end of the month), we have no way of retroactively refunding the charge.
 
 1. Go back to your instances dashboard on AWS console. Click on the "+" sign next to View Alarms for your trn1_cs152 instance.
-2. Configure your alarm as shown in the picture below, and click Create
+2. Configure your alarm as shown in the picture below.
     - Toggle "Alarm Action" on, and Select "Stop"
     - Group samples by: Maximum
     - Type of data to sample: CPU Utilization
@@ -129,6 +129,8 @@ ssh trn1_cs152
 <p align="center">
   <img width="70%" src="./img/aws_setup/8_alarm_details.png">
 </p>
+
+Then, scroll down to the bottom and click the orange "Create" button.
 
 3. Search "Budgets" in the top search bar, and in the "Features" section, click on "Budgets". Click on the orange "Create a Budget" button. 
 4. Fill in the information to match the picture below, and enter your email for the "Email recipients" section.
