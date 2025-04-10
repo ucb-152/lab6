@@ -71,7 +71,7 @@ If you get an error saying your "Instance launch failed" due to requesting more 
 
 ## Step 2: Setup Elastic IPs
 This next step is to set up an Elastic IP for your instance. By default, the IPv4 associated with an instance changes each time you launch it. This is quite annoying since you will need to stop and start the instance constantly to save costs and credit usage. By allocating an Elastic IP and associating it with the instance, we avoid having to change your SSH config each time. 
-1. After clicking "Launch Instance" from the previous step, you should have landed back in the EC2 dashboard. Scroll down on the left side of the screen until you get to "Network & Security" settings, and click on Elastic IPs.
+1. After clicking "Launch Instance" from the previous step, go back to the [EC2 dashboard](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Home). Scroll down on the left side of the screen until you get to "Network & Security" settings, and click on Elastic IPs.
 2. Click the orange "Allocate Elastic IP address" button in the top-right corner of the screen
 3. Click the orange "Allocate" button. Now, you have an Elastic IP to use.
 4. Rename the Elastic IP to trn1_cs152
@@ -112,7 +112,7 @@ ssh trn1_cs152
 ## Step 4: Setup Auto-Shutdown and Budget
 > [!IMPORTANT] 
 > 
-> This final step is very important! We will set up alarms, auto-shutdown, and budget notifications to make sure you don't burn through your credits accidentally and get your credit card charged. 
+> This step is very important! We will set up alarms, auto-shutdown, and budget notifications to make sure you don't burn through your credits accidentally and get your credit card charged. 
 >
 > Note that even with these safeguards, **it is still your responsibility to make sure your instance is shutdown** in case the auto-shutdown fails. We can help resolve credit overages, payment, and billing issues before the monthly billing cycle, but once a payment is charged to your card (at then end of the month), we have no way of retroactively refunding the charge.
 
