@@ -241,6 +241,7 @@ Now, look through the other python files in the directory:
 - `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with levels of optimization. Read the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) for more information. 
 - `kernels.py`: Contains the kernels you will need to implement for the FFNN. **This is the only file you will need to edit.**
 - `ffnn.py`: Main program to run the kernels and benchmark performance.
+- `tester.py`: Testing program to help debug kernels individually.
 
 Make sure these sections of the documentation before proceeding:
 - [Implementing your first NKI kernel](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/getting_started.html#implementing-your-first-nki-kernel)
@@ -259,16 +260,32 @@ Fill in the blanks to implement the transpose kernel.
 - Hint 2: Use `nl.tile_size.pmax` to get the max partition dimension. Remember, the partition dimension is the first index unless otherwise specified ([Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)).
 - Hint 3: Use iterators to loop through the indices when tiling: [NKI Language (Iterators)](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#iterators)
 
+Once you have completed the kernel, run the following command to confirm your implementation works:
+```bash
+python tester.py --test-transpose
+```
+
+If you are not passing the tests, make sure to read the documentation carefully for the limits and restrictions on various NKI APIs. You may also wish to print your tensor values within the NKI kernel. While this is not possible when running the kernel on Tranium, the `tester.py` script uses the `nki.simulate_kernel` feature, which enables device printing with [nl.device_print](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html). Thus, you can put nl.device_print statements in your kernel if you are testing via the `tester.py` script.
+
+
 #### Step 4: Program the nki_bias_add_act kernel
 As the name suggests, this kernel will take an input tensor, a bias vector, and an activation function, and apply the bias and activation to each row of the input tensor. Complete the kernel to perform the described computation.
 
 - Hint 1: Many of the [NKI math operations](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#math-operations) allow for the operands to have different dimensions, as long as one can be broadcasted into the other.
 - Hint 2: Most common activation functions are available in the [NKI math operations](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#math-operations)
 
+Once you have completed the kernel, run the following command to confirm your implementation works:
+```bash
+python tester.py --test-bias-add-act
+```
 
 #### Step 5: Program the nki_forward kernel
 Similar to the reference numpy model, this kernel will combine the transpose, matmul, and bias/activation kernels to perform the forward pass of the neural network. Fill in the blanks to complete the kernel. Do not change the existing skeleton code for selecting the specific matmul kernel version to use, this will be needed for benchmarking.
 
+Once you have completed the kernel, run the following command to confirm your implementation works:
+```bash
+python tester.py --test-forward
+```
 
 #### Step 6: Program the nki_predict kernel
 Now, we will combine all our kernels to get the probability distribution from the forward pass, and identify our output classes.
@@ -279,12 +296,17 @@ Now, we will combine all our kernels to get the probability distribution from th
 Hint 1: You don't need to program much for Step 1
 Hint 2: You may need to break this up into two steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
 
+Once you have completed the kernel, run the following command to confirm your implementation works:
+```bash
+python tester.py --test-predict
+```
+
 #### Step 7: Run nki_predict
-Once you have completed all of the above steps, your NKI FFNN kernel should be complete! Run the command below:
+Once you have completed all of the above steps, your NKI FFNN kernel should be complete! Run the command below to run all the kernels on Tranium:
 ```bash
 python ffnn.py
 ```
-If you get the message: "Predictions match the golden model." then you have succesfully completed the above steps, and can proceed to the next step. Otherwise, make sure to fix your kernel before proceeding
+If you get the message: "Predictions match the golden model." then you have succesfully completed the above steps, and can proceed to the next step. Otherwise, make sure to fix your kernels before proceeding.
 
 #### Step 8: Benchmark nki_predict
 Run the following command to benchmark the `nki_predict` kernel, using the different matmul kernels. 
