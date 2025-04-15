@@ -136,7 +136,7 @@ A feedforward neural network is a type of neural network where the information f
 
 Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This is calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples, and `d` is the number of input features. Each of the hidden layers weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. You can calculate the hidden layer neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/).  
 
-Finally, we end with the output layer, which contains neurons that correspond to the intended output of the neural network. For example, in a classification problem, the each neuron would correspond to a class, and the neuron with the highest activation would be the class the neurla network is assigning to the input.
+Finally, we end with the output layer, which contains neurons that correspond to the intended output of the neural network. For example, in a classification problem, each neuron would correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is assigning to the input.
 
 If you would like to learn more on feedforward neural networks, check out [this article](https://www.geeksforgeeks.org/feedforward-neural-network/). 
 
@@ -203,14 +203,96 @@ All computations require laoding data from the HBM into the SBUF, which is conne
   <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch">Source</a>
 </p>
 
-There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of the compute engines and memory heirarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
+There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of the all of the compute engines and full memory heirarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
+
+In order to program the Tranium devices easily, we will take advantage of AWS's [Neuron Kernel Interface](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/index.html) or NKI. This is a collection of APIs that allow users to program directly in Python and perform computations using the Tranium engines.
+> [!IMPORTANT]
+>
+> Make sure to skim through the [Neuron Kernel Interface](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/index.html) documentation, and pay particular attention to the [NKI Language](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html) APIs.
+
 
 
 ### Part 6: Tranium Setup
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
 
-### Part 7: Basic Tests on Tranium
+### Part 7: Feedforward Neural Network on Gemmini
+To begin, ssh into your Tranium instance or open a remote session using VSCode (or another application). Once you are logged in, make sure to source the NKI PyTorch environment. You must do this whenever you open a new terminal.
+```bash
+source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate
+```
 
+#### Step 1: Observe the Python/Numpy Reference FFNN
+To start, take a look at `ffnn_ref.py` for a Numpy implementation of the Feedforward Neural Network. This will give you a valuable insight into the operations and kernels needed to perform this computation. Then, run the following command to benchmark the reference implementation.
+```bash
+python ffnn_ref.py --benchmark
+```
+You should see that the prediction operation takes roughly 440-450ms to run using Python and Numpy. Keep this figure in mind when comparing to the performance of the kernel on Tranium using NKI.
+
+Now, run the program again with the following command-line flags to store the input data and golden model results. We will use these for the NKI implementation.
+```bash
+python ffnn_ref.py --store-input --store-weights --store-results
+```
+
+There should be `*.bin` files in the `ffnn` directory, one for each of the following matrices: `X`, `W1`, `b1`, `W2`, `b2`, and `Y`.
+
+#### Step 2: Tour of NKI Files
+Now, look through the other python files in the directory:
+- `utils.py`: Utility functions for loading the matrices, and constants for the matrix dimensions
+- `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with levels of optimization. Read the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) for more information. 
+- `kernels.py`: Contains the kernels you will need to implement for the FFNN. **This is the only file you will need to edit.**
+- `ffnn.py`: Main program to run the kernels and benchmark performance.
+
+Make sure these sections of the documentation before proceeding:
+- [Implementing your first NKI kernel](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/getting_started.html#implementing-your-first-nki-kernel)
+- [Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)
+
+In addition to the linked sections, we highly recommend reading or skimming the full guides, as they will help in developing the NKI kernels.
+
+
+#### Step 3: Program the nki_transpose kernel
+As mentioned in the guides, there are three main stages to programming a NKI kernel: 1) Load inputs, 2) Perform computation, and 3) Store outputs. For `nki_tranpose`, we are not really performing any computation, but we can consider "transposing" as the desired modification to the input data. 
+
+Another important detail is that NKI operations often have dimension restrictions due to the physical limits of the hardware. Thus, we must "tile" our operations when dealing with larger matrices (which is quite common, as matrices in ML workloads usually of dimensions > 1000). Make sure you have read the APIs carefully and account for the restrictions. 
+
+Fill in the blanks to implement the transpose kernel. 
+- Hint 1: there is a NKI API that loads and transposes a tile.
+- Hint 2: Use `nl.tile_size.pmax` to get the max partition dimension. Remember, the partition dimension is the first index unless otherwise specified ([Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)).
+- Hint 3: Use iterators to loop through the indices when tiling: [NKI Language (Iterators)](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#iterators)
+
+#### Step 4: Program the nki_bias_add_act kernel
+As the name suggests, this kernel will take an input tensor, a bias vector, and an activation function, and apply the bias and activation to each row of the input tensor. Complete the kernel to perform the described computation.
+
+- Hint 1: Many of the [NKI math operations](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#math-operations) allow for the operands to have different dimensions, as long as one can be broadcasted into the other.
+- Hint 2: Most common activation functions are available in the [NKI math operations](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#math-operations)
+
+
+#### Step 5: Program the nki_forward kernel
+Similar to the reference numpy model, this kernel will combine the transpose, matmul, and bias/activation kernels to perform the forward pass of the neural network. Fill in the blanks to complete the kernel. Do not change the existing skeleton code for selecting the specific matmul kernel version to use, this will be needed for benchmarking.
+
+
+#### Step 6: Program the nki_predict kernel
+Now, we will combine all our kernels to get the probability distribution from the forward pass, and identify our output classes.
+1. Fill in the blank to get the `probs` matrix, which corresponds to the probability of each of the output classes for each of the inputs
+2. Select the index of the highest probability per input (i.e. per row), and place that in the `predictions` array.
+3. Return the `predictions` array
+
+Hint 1: You don't need to program much for Step 1
+Hint 2: You may need to break this up into two steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
+
+#### Step 7: Run nki_predict
+Once you have completed all of the above steps, your NKI FFNN kernel should be complete! Run the command below:
+```bash
+python ffnn.py
+```
+If you get the message: "Predictions match the golden model." then you have succesfully completed the above steps, and can proceed to the next step. Otherwise, make sure to fix your kernel before proceeding
+
+#### Step 8: Benchmark nki_predict
+Run the following command to benchmark the `nki_predict` kernel, using the different matmul kernels. 
+```bash
+python ffnn.py --benchmark
+```
+- Compare the latency of the "tiled" matmul vs the reference numpy implementation. How much faster is the NKI implementation?
+- Compare the latencies of the various matmul kernels. Record any trends or outliers you notice, and give a brief explanation for your observations.
 
 
 ## Open-Ended Portion
