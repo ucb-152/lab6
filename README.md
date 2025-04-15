@@ -142,17 +142,25 @@ If you would like to learn more on feedforward neural networks, check out [this 
 
 #### Designing a Neural Network Kernel using Gemmini
 
-Now we will use the Gemmini accelerator to perform the calculations needed for a feedforward neural network. We have provided a template to get started with in `${TESTDIR}/ffnn.c`.
+Now we will use the Gemmini accelerator to perform the calculations needed for a feedforward neural network. We have provided a template to get started with in `${LAB6ROOT}/lab/ffnn.c`.
 
-1. Modify `ffnn.c` to perform the calculations of a feedforward neural network.
+1. Generate the weights and copy over the template code.
+```bash
+cd ${LAB6ROOT}/lab/
+GEMDIR=$GEMDIR ./generate.sh
+```
 
-2. Rebuild the tests with your modifications. The binary for ffnn.c will now be in `${BINDIR}/ffnn-baremetal`
+2. Add `ffnn` to the list of tests in `${TESTDIR}/Makefile`
+
+3. Modify `ffnn.c` to perform the calculations of a feedforward neural network. Follow the comments, and use the functions in `gemmini.h` as well as the descriptions in [Gemmini ISA overview](https://github.com/ucb-bar/gemmini/tree/master?tab=readme-ov-file#isa) to complete the code.
+
+4. Rebuild the tests with your modifications. The binary for ffnn.c will now be in `${BINDIR}/ffnn-baremetal`
 ```bash
 cd ${GEMDIR}/software/gemmini-rocc-tests/
 ./build.sh
 ```
 
-7. Run the `ffnn-baremetal` binary on the Gemmini simulator and ensure that your test passes.
+5. Run the `ffnn-baremetal` binary on the Gemmini simulator and ensure that your test passes.
 ```bash
 cd ${SIMDIR}
 make CONFIG=GemminiRocketConfig run-binary BINARY=${BINDIR}/ffnn-baremetal
