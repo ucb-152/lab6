@@ -230,7 +230,7 @@ You should see that the prediction operation takes roughly 440-450ms to run usin
 
 Now, run the program again with the following command-line flags to store the input data and golden model results. We will use these for the NKI implementation.
 ```bash
-python ffnn_ref.py --store-input --store-weights --store-results
+python ffnn_ref.py --store-data
 ```
 
 There should be `*.bin` files in the `ffnn` directory, one for each of the following matrices: `X`, `W1`, `b1`, `W2`, `b2`, and `Y`.
