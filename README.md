@@ -134,9 +134,9 @@ Now that you have a basic understanding for the Gemmini accelerator and instruct
 
 A feedforward neural network is a type of neural network where the information flows through the layers in one direction. We start with the input layer, which recieves the initial data, with each neuron acting as a feature of the input data. 
 
-Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This is calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples, and `d` is the number of input features. Each of the hidden layers weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. You can calculate the hidden layer neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/).  
+Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This is calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples, and `d` is the number of input features. Each of the hidden layers weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. You can calculate the hidden layer neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/). The bias vector is added to each row of the `XW` matmul result.
 
-Finally, we end with the output layer, which contains neurons that correspond to the intended output of the neural network. For example, in a classification problem, each neuron would correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is assigning to the input.
+Finally, we end with the output layer, which contains neurons that correspond to the intended output of the neural network. For example, in a classification problem, each neuron would correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is predicting for the input.
 
 If you would like to learn more on feedforward neural networks, check out [this article](https://www.geeksforgeeks.org/feedforward-neural-network/). 
 
@@ -144,15 +144,15 @@ If you would like to learn more on feedforward neural networks, check out [this 
 
 Now we will use the Gemmini accelerator to perform the calculations needed for a feedforward neural network. We have provided a template to get started with in `${LAB6ROOT}/lab/ffnn.c`.
 
-1. Generate the weights and copy over the template code.
+1. Enter the following command to generate the weights and copy over the template code and weights files.
 ```bash
 cd ${LAB6ROOT}/lab/
 GEMDIR=$GEMDIR ./generate.sh
 ```
 
-2. Add `ffnn` to the list of tests in `${TESTDIR}/Makefile`
+2. Navigate to `${TESTDIR}/Makefile`, and add `ffnn` to the list of tests.
 
-3. Modify `ffnn.c` to perform the calculations of a feedforward neural network. Follow the comments, and use the functions in `gemmini.h` as well as the descriptions in [Gemmini ISA overview](https://github.com/ucb-bar/gemmini/tree/master?tab=readme-ov-file#isa) to complete the code.
+3. Modify `${TESTDIR}/ffnn.c` to perform the calculations of a feedforward neural network. Follow the comments, and use the functions in `gemmini.h` as well as the descriptions in [Gemmini ISA overview](https://github.com/ucb-bar/gemmini/tree/master?tab=readme-ov-file#isa) to complete the code.
 
 4. Rebuild the tests with your modifications. The binary for ffnn.c will now be in `${BINDIR}/ffnn-baremetal`
 ```bash
@@ -195,7 +195,7 @@ As mentioned before, there are various levels of memory at play in the Tranium I
   <a href="https://github.com/stanford-cs149/asst4-trainium/tree/main">Source</a>
 </p>
 
-All computations require laoding data from the HBM into the SBUF, which is connected as an input to all of the engines. The output of the Tensor Engine is stored in the PSUM, which can be an input to the Vector and Scalar Engines. The Vector, Scalar, and GpSimd engine can write back to the SBUF. 
+All computations require loading data from the HBM into the SBUF, which is connected as an input to all of the engines. The output of the Tensor Engine is stored in the PSUM, which can be an input to the Vector and Scalar Engines. The Vector, Scalar, and GpSimd engine can write back to the SBUF. 
 
 <p align="center">
   <img width="400" src="./img/neuron_core.png">
@@ -211,7 +211,6 @@ In order to program the Tranium devices easily, we will take advantage of AWS's 
 > Make sure to skim through the [Neuron Kernel Interface](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/index.html) documentation, and pay particular attention to the [NKI Language](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html) APIs.
 
 
-
 ### Part 6: Tranium Setup
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
 
@@ -219,6 +218,12 @@ To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETU
 To begin, ssh into your Tranium instance or open a remote session using VSCode (or another application). Once you are logged in, make sure to source the NKI PyTorch environment. You must do this whenever you open a new terminal.
 ```bash
 source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate
+```
+
+Once you have logged into the instance, clone the lab repo. All files needed for this part are located in `lab6/nki_ffnn`
+```bash
+git clone <TODO: Insert repo link here>
+cd lab6/nki_ffnn
 ```
 
 #### Step 1: Observe the Python/Numpy Reference FFNN
@@ -243,17 +248,19 @@ Now, look through the other python files in the directory:
 - `ffnn.py`: Main program to run the kernels and benchmark performance.
 - `tester.py`: Testing program to help debug kernels individually.
 
-Make sure these sections of the documentation before proceeding:
-- [Implementing your first NKI kernel](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/getting_started.html#implementing-your-first-nki-kernel)
-- [Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)
-
-In addition to the linked sections, we highly recommend reading or skimming the full guides, as they will help in developing the NKI kernels.
+> [!IMPORTANT]
+>
+> Make sure these sections of the documentation before proceeding:
+> - [Implementing your first NKI kernel](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/getting_started.html#implementing-your-first-nki-kernel)
+> - [Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)
+>
+> In addition to the linked sections, we highly recommend reading or skimming the full guides, as they will help in developing the NKI kernels.
 
 
 #### Step 3: Program the nki_transpose kernel
 As mentioned in the guides, there are three main stages to programming a NKI kernel: 1) Load inputs, 2) Perform computation, and 3) Store outputs. For `nki_tranpose`, we are not really performing any computation, but we can consider "transposing" as the desired modification to the input data. 
 
-Another important detail is that NKI operations often have dimension restrictions due to the physical limits of the hardware. Thus, we must "tile" our operations when dealing with larger matrices (which is quite common, as matrices in ML workloads usually of dimensions > 1000). Make sure you have read the APIs carefully and account for the restrictions. 
+Another important detail is that NKI operations often have dimension restrictions due to the physical limits of the hardware. Thus, we must "tile" our operations when dealing with larger matrices (which is quite common, as matrices in ML workloads usually have dimensions > 1000). Make sure you have read the APIs carefully and account for the restrictions. 
 
 Fill in the blanks to implement the transpose kernel. 
 - Hint 1: there is a NKI API that loads and transposes a tile.
@@ -265,7 +272,9 @@ Once you have completed the kernel, run the following command to confirm your im
 python tester.py --test-transpose
 ```
 
-If you are not passing the tests, make sure to read the documentation carefully for the limits and restrictions on various NKI APIs. You may also wish to print your tensor values within the NKI kernel. While this is not possible when running the kernel on Tranium, the `tester.py` script uses the `nki.simulate_kernel` feature, which enables device printing with [nl.device_print](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html). Thus, you can put nl.device_print statements in your kernel if you are testing via the `tester.py` script.
+If you are not passing the tests, make sure to read the documentation carefully for the limits and restrictions on various NKI APIs. 
+
+You may also wish to print your tensor values within the NKI kernel. While this is not possible when running the kernel on Tranium, the `tester.py` script uses the `nki.simulate_kernel` feature, which enables device printing with [nl.device_print](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html). Thus, you can put nl.device_print statements in your kernel if you are testing via the `tester.py` script.
 
 
 #### Step 4: Program the nki_bias_add_act kernel
@@ -290,11 +299,13 @@ python tester.py --test-forward
 #### Step 6: Program the nki_predict kernel
 Now, we will combine all our kernels to get the probability distribution from the forward pass, and identify our output classes.
 1. Fill in the blank to get the `probs` matrix, which corresponds to the probability of each of the output classes for each of the inputs
-2. Select the index of the highest probability per input (i.e. per row), and place that in the `predictions` array.
+2. Select the index of the highest probability per input (i.e. per row), and place that in the `predictions` array. Do not use numpy.argmax or another raw python method for this. Use the NKI APIs.
 3. Return the `predictions` array
 
-Hint 1: You don't need to program much for Step 1
-Hint 2: You may need to break this up into two steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
+Follow the steps above to implement the `nki_predict` kernel.
+
+- Hint 1: You don't need to program much for Step 1
+- Hint 2: You may need to break Step 2 into two seperate steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need for this can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
 
 Once you have completed the kernel, run the following command to confirm your implementation works:
 ```bash
