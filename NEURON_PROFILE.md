@@ -1,6 +1,9 @@
 # Neuron Profile User Guide
+Neuron Profile is an AWS tool to allow users to view the performance metrics of programs run on Neuron Devices like Tranium. Read the [Neuron Profile User Guide](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-profile-user-guide.html) for more detailed information.
 
 ## Installing InfluxDB on DLAMI Trn1
+If you ran the `install.sh` script, this step as already been completed, so you can move on to [Using neuron-profile](#using-neuron-profile) section.
+
 To install InfluxDB compatible with `neuron-profile`:
 ```bash
 wget -q https://repos.influxdata.com/influxdata-archive_compat.key
@@ -15,33 +18,29 @@ influx setup
 For the setup parameters, enter
 - Username: ubuntu
 - Organization: ucberkeley
-- Bucket: primary_bucket
+- Bucket: lab6
 
-For all other parameters, just click enter to use the default values.
+For all other parameters, just clikc enter to use the default values.
 
 ## Using neuron-profile
-To create the NEFF and NTFF files to run `neuron-profile` with, add the decorator below to the target kernel:
+To create the NEFF and NTFF files to run `neuron-profile` with, add the decorator below to the target kernel, replacing the `@nki.jit` decorator.
 ```python
 @nki.profile(working_directory="/home/ubuntu/", save_neff_name='nki_kernel.neff', save_trace_name='nki_kernel.ntff', profile_nth=2)
 ```
 Replace the parameters with the names and paths of your choice.
 
-Then, run the kernel to generate the files. Note that the kernel will no longer return values, so disable any verification check you have when you have the profile decorator activated. Replace the python file with the file that calls your nki.profile decorated kernel.
+Then, run the kernel to generate the files. Note that the kernel will no longer have any return values, so disable any verification check you have when you have the profile decorator activated. Replace the python file with the file that calls your nki.profile decorated kernel.
 ```bash
 python program.py
 ```
 
 Finally, use `neuron-profile` to view the profile GUI.
 ```bash
-neuron-profile view -n nki_kernel.neff -s nki_kernel_exec_2.ntff --db-bucket=my_kernel
+neuron-profile view -n nki_kernel.neff -s nki_kernel_exec_2.ntff
 ```
 This will take a while to load, but once it does, click on the link to view the profile GUI.
 
-Make sure you have port forwarding enabled. You can run this command on a seperate terminal on your local machine to enable port forwarding.
+Make sure you have port forwarding enabled. You can run this command in a seperate terminal on your local machine to enable port forwarding:
 ```bash
 ssh trn1_cs152 -L 3001:localhost:3001 -L 8086:localhost:8086
 ```
-
-
-
-

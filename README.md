@@ -215,18 +215,23 @@ In order to program the Tranium devices easily, we will take advantage of AWS's 
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
 
 ### Part 7: Feedforward Neural Network on Gemmini
-To begin, ssh into your Tranium instance or open a remote session using VSCode (or another application). Once you are logged in, make sure to source the NKI PyTorch environment. You must do this whenever you open a new terminal.
-```bash
-source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate
-```
+To begin, ssh into your Tranium instance or open a remote session using VSCode (or another application). 
 
-Once you have logged into the instance, clone the lab repo. All files needed for this part are located in `lab6/nki_ffnn`
+Once you have logged into the instance, clone the lab repo. 
 ```bash
 git clone <TODO: Insert repo link here>
-cd lab6/nki_ffnn
+cd lab6
 ```
 
+Finally, run the `install.sh` script. 
+```bash
+source install.sh
+```
+The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), that contains all the dependencies needed for the assignment. It will also modify your ~/.bashrc file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
+
 #### Step 1: Observe the Python/Numpy Reference FFNN
+All files needed for this part are located in `lab6/nki_ffnn`.
+
 To start, take a look at `ffnn_ref.py` for a Numpy implementation of the Feedforward Neural Network. This will give you a valuable insight into the operations and kernels needed to perform this computation. Then, run the following command to benchmark the reference implementation.
 ```bash
 python ffnn_ref.py --benchmark
