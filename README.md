@@ -54,7 +54,7 @@ The NeuronCores are highly optimized and designed for ML workloads, and thus eac
 There are various levels of memory at play in the Tranium Instance. There is the host memory that is external to the Neuron Cores. Then, there is the HBM, which is the main on-device memory. Finally there is the on-chip memory, consisting of the SBUF (State Buffer) and the PSUM (Partial Sum Buffer). The levels, sizes, and bandwidths of these memories are shown below.
 
 <p align="center">
-  <img width="400" src="./img/memory_hierarchy.png">
+  <img width="600" src="./img/memory_hierarchy.png">
   <br>
   <a href="https://github.com/stanford-cs149/asst4-trainium/tree/main">Source</a>
 </p>
@@ -73,9 +73,13 @@ There are a lot of factors at play when writing kernels on Tranium devices, and 
 ### Tranium Setup
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
 
+> [!IMPORTANT] 
+> 
+> Do not proceed with the rest of the lab without completing this step.
+
 
 ## Directed Portion
-For the Directed portion, you are tasked with developing a `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familarize yourself with the Tranium and NeuronCore architecture, and how to program them using AWS's [Neuron Kernel Interface](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/index.html) or NKI, which you will learn more about soon.
+For the Directed portion, you are tasked with developing a `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familarize yourself with the Tranium and NeuronCore architecture, and how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
 
 ### Overview of Feedforward Neural Networks
 
@@ -87,11 +91,11 @@ For the Directed portion, you are tasked with developing a `ffnn` (Feedforward N
 
 A feedforward neural network is a type of neural network where the information flows through the layers in one direction. We start with the input layer, which recieves the initial data, with each neuron acting as a feature of the input data. 
 
-Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This is calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples (often referred to as the batch size), and `d` is the number of input features. Each of the hidden layers weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. 
+Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This is calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples (often referred to as the batch size), and `d` is the number of input features. Each connection between layers can be represented by a weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. 
 
-You can calculate the hidden layer neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/) or [Softmax](https://www.geeksforgeeks.org/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/). The bias vector is broadcasted to the dimensions `(d, h)` and thus the bias vector is added to each row of the `XW` matmul result. A similar calculation can be done for each layer, until we reach the output layer. This process of taking the inputs and stepping through the layers of the neural network, until we reach the output layer, is known as the **forward pass**.
+You can calculate the activations of the next layer of neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/)(typically used on the hidden layers) or [Softmax](https://www.geeksforgeeks.org/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/) (typically used on the output layer). The bias vector is broadcasted to the dimensions `(d, h)` and thus the bias vector is added to each row of the `XW` matmul result. We can continue with similar caculations for each layer, until we reach the output layer. This process of taking the inputs and stepping through the layers of the neural network, until we reach the output layer, is known as the **forward pass**.
 
-The output layer contains the activations of the neurons that correspond to the output of the neural network. For example, in a classification problem, each neuron could correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is predicting for the input.  
+The output layer contains the activations of the neurons that correspond to the output of the neural network. For example, in a classification problem, each neuron could correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is **predicting** for the input.  
 
 If you would like to learn more on feedforward neural networks, check out this article on [Feedforward Neural Networks](https://www.geeksforgeeks.org/feedforward-neural-network/). 
 
@@ -110,13 +114,15 @@ source install.sh
 ```
 The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), that contains all the dependencies needed for the assignment. It will also modify your ~/.bashrc file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
 
-All files needed for this part are located in `lab6/nki_ffnn`.
+All files needed for the directed portion are located in `lab6/nki_ffnn`.
 - `utils.py`: Utility functions for loading the matrices, and constants for the matrix dimensions
 - `ffnn_ref.py`: Reference NumPy implementation of the Feedforward Neural Network.
 - `ffnn.py`: Main program to run the kernels and benchmark performance.
-- `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with various levels of optimization. Read the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) for more information. 
-- `kernels.py`: Contains the kernels you will need to implement for the FFNN. **This is the only file you will need to edit.**
-- `tester.py`: Testing program to help debug kernels individually.
+- `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with various levels of optimization. 
+  - Read the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) for more information. 
+- `kernels.py`: Contains the kernels you will need to implement for the FFNN. 
+  - **This is the only file you will need to edit.**
+- `tester.py`: Debug kernels individually on CPU before running full kernel on Tranium.
 
 ### Step 1: Observe the Python/Numpy Reference FFNN
 
