@@ -214,7 +214,7 @@ In order to program the Tranium devices easily, we will take advantage of AWS's 
 ### Part 6: Tranium Setup
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
 
-### Part 7: Feedforward Neural Network on Gemmini
+### Part 7: Feedforward Neural Network on Tranium
 To begin, ssh into your Tranium instance or open a remote session using VSCode (or another application). 
 
 Once you have logged into the instance, clone the lab repo. 
@@ -334,7 +334,43 @@ python ffnn.py --benchmark
 
 
 ## Open-Ended Portion
+For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium, and optimizing it as much as possible! This assignment should be completed individually, and the most performant kernels will recieve prizes from AWS!
+
+### Prizes:
+The prizes for the best performing `conv2d` kernels are as follows:
+- 1st Place: $200 Amazon gift card
+- 2nd-4th Place: $100 Amazon gift card
+- Amazon Echo Show
+
+Now that you are excited to win some prizes, lets get into the task!
+
+### Overview of 2D Convolutions:
 TODO
+
+
+### Program `conv2d_nki`
+All of the files needed for this part are located in `lab6/nki_conv2d`
+
+To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementations for the 2D Convolution kernels:
+- `conv2d_torch`: Built-in PyTorch implementation for [2D Convolution](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html). **Used as the golden model.**
+- `conv2d_numpy`: A naive implementation using NumPy, performing the basic filter application and bias addition. **Intended as a naive functional reference model.**
+- `conv2d_numpy_matmul`: A more optimized implementation using tranposing, reshaping, and matrix multiplication
+- `conv2d_numpy_matmul_tiled`: Similar to the `conv2d_numpy_matmul` implementation but with tiling
+
+The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an idea of how to translate the `conv2d` operations into matrix multiplications. Feel free to reshape, tile, and operate on the data however you want, as long as you match the reference model.
+
+To run the reference kernels and benchmark their performance, run the following command.
+```bash
+python ref_tester.py --benchmark
+```
+
+Note that the PyTorch version will be significantly faster than the NumPy versions, since it as been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
+
+
+#### Brainstorm using NumPy
+If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
+
+Feel free to comment out the other kernels to only benchmark the kernels you are modifying or developing.
 
 
 ## Acknowledgements
