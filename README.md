@@ -1,6 +1,6 @@
 # CS152 Laboratory Exercise 6
 
-## Introduction:
+## Introduction and Goals:
 The goal of this laboratory assignment is to give you an opportunity to program hardware accelerators. As the computational demands of AI and ML applications continue to increase, industry and research efforts have been attempting to meet these demands with Domain Specific Acceleration and custom accelerator hardware. As a result, an increasingly important skill is the ability to map software applications and kernels onto new architectures. 
 
 It is important to learn how to optimize programs to take full advantage of the memory and compute engines available on the target hardware. There are many factors to consider when designing a kernel, such as the communication between compute engines and memory, the amount of data a compute engine can do work on at a given time, the dependencies between different computations in your kernel, and more. By the end of this lab, you should be able to program basic kernels on [NeuronCore](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/neuron-core-v2.html#neuroncores-v2-arch), the main accelerator device in [AWS Tranium](https://aws.amazon.com/ai/machine-learning/trainium/) machines.
@@ -17,7 +17,7 @@ All reports are to be submitted through [Gradescope](https://www.gradescope.com/
 > - Page limits
 
 
-## Introduction & Setup:
+## Background:
 ### ML Accelerator Hardware
 In previous labs and lectures, you have learned about various architectures like CPUs (scalar, superscalar, out-of-order, VLIW, etc.), Vector Engines, GPUs, etc. One type of architecture that is prevalent in ML accelerator chips are **systolic arrays**. Systolic array architectures are often used in ML and AI applications because they are suited for computing operations on matrices, which are often used in applications like Neural Networks and Large Language Models. A systolic array is a type of spatial array, which describes a family of architectures that use arrays of compute cells called PEs (Processing Elements), which typically do MAC (Multiply and Accumulate) operations.
 

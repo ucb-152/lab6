@@ -20,7 +20,7 @@ For the setup parameters, enter
 - Organization: ucberkeley
 - Bucket: lab6
 
-For all other parameters, just clikc enter to use the default values.
+For all other parameters, just click enter to use the default values.
 
 ## Using neuron-profile
 To create the NEFF and NTFF files to run `neuron-profile` with, add the decorator below to the target kernel, replacing the `@nki.jit` decorator.
