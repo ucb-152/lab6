@@ -114,10 +114,22 @@ source install.sh
 ```
 The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), that contains all the dependencies needed for the assignment. It will also modify your ~/.bashrc file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
 
+> [!IMPORTANT]
+> 
+> Now, shut down your instance before proceeding
+
+Clone the github repo to your local machine too
+```bash
+git clone <TODO: Insert repo link here>
+cd lab6
+```
+
+This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub, and pull them on the Tranium instance to simulate or benchmark them. You are allowed to develop your kernels directly while connected to the Tranium instance, but keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time,  
+
 All files needed for the directed portion are located in `lab6/nki_ffnn`.
 - `utils.py`: Utility functions for loading the matrices, and constants for the matrix dimensions
 - `ffnn_ref.py`: Reference NumPy implementation of the Feedforward Neural Network.
-- `ffnn.py`: Main program to run the kernels and benchmark performance.
+- `ffnn.py`: Main program develop the `ffnn` NKI kernels
 - `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with various levels of optimization. 
   - Read the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) for more information. 
 - `kernels.py`: Contains the kernels you will need to implement for the FFNN. 
@@ -278,11 +290,15 @@ For the kernel we will be developing, we will take in the following inputs:
 The expected output is:
 - `out_tensor`: Output tensor (`batch_size`, `out_channels`, `output_height`, `output_width`).
 
-Note the addition of the `batch_size`, which is the number of input data elements we are processing in a single batch (e.g doing conv2d on multiple images with the same set of filters). The weight tensor `W` contains `out_channels` number of multi-channel filters, thus the expected `out_tensor` has a feature map(`output_height`, `output_width`) for each filter.
-
+Note the addition of the `batch_size`, which is the number of input data elements we are processing in a single batch (e.g doing conv2d on multiple images with the same set of filters). The weight tensor `W` contains an `out_channels` number of multi-channel filters, thus the expected `out_tensor` has a feature map(`output_height`, `output_width`) for each filter. The `out_tensor` contains this set of feature maps for all of the images in the original batch input.
 
 ### Step 0: Files for `conv2d_nki`
-All of the files needed for this part are located in `lab6/nki_conv2d`
+All of the files needed for this part are located in `lab6/nki_conv2d`.
+
+- `conv2d_ref.py`: Reference PyTorch and NumPy implementations of the 2D Convolution kernel.
+- `conv2d.py`: Main program to develop the `conv2d` NKI kernels
+- `tester_ref.py`: Test and benchmark reference kernel implementations.
+- `tester.py`: Test and benchmark NKI kernel implementation.
 
 To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementations for the 2D Convolution kernels:
 - `conv2d_torch`: Built-in PyTorch implementation for [2D Convolution](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html). **Used as the golden model.**
@@ -296,6 +312,20 @@ To run the reference kernels and benchmark their performance, run the following 
 ```bash
 python tester_ref.py --benchmark
 ```
+This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter fimensions, and date type.
+
+Note that `conv2d_torch` will be significantly faster than the NumPy versions, since it has been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
+
+### Step 1: Brainstorm your implementation
+TODO
+
+#### Brainstorm using NumPy
+If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
+
+Feel free to comment out the other kernels to only benchmark the kernels you are modifying or developing.
+
+
+## Acknowledgements
 This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter fimensions, and date type.
 
 Note that `conv2d_torch` will be significantly faster than the NumPy versions, since it has been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
