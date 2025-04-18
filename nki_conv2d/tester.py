@@ -14,8 +14,30 @@ import logging
 import argparse
 import io
 import sys
+import subprocess
 
 logging.disable(logging.OFF)
+
+def save_trace(profile_name, neff_file_name):
+    """Run the profiler and save the NEFF and NTFF files with the specified name."""
+    subprocess.run(
+        [
+            "neuron-profile",
+            "capture",
+            "-n",
+            neff_file_name,
+            "-s",
+            profile_name + ".ntff",
+        ],
+        check=True,
+    )
+
+    subprocess.run(["mv", neff_file_name, profile_name + ".neff"], check=True)
+
+    print(
+        f"\n\nNEFF / NTFF files generated with names: {profile_name + '.neff'}, {profile_name + '.ntff'}"
+    )
+
 
 def test_correctness_conv2d_kernel(
     kernel,
