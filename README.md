@@ -224,6 +224,10 @@ python ffnn.py --benchmark
 - Compare the latency of the "tiled" matmul vs the reference numpy implementation. How much faster is the NKI implementation?
 - Compare the latencies of the various matmul kernels. Record any trends or outliers you notice, and give a brief explanation for your observations.
 
+### Step 9: Submission
+TODO
+
+
 
 ## Open-Ended Portion
 For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium, and optimizing it as much as possible! This assignment should be completed individually, and the most performant kernels will recieve prizes from AWS!
@@ -248,7 +252,7 @@ Now that you are excited to win some prizes, lets get into the task!
 
 The mathematical operation for a single filter application can be expressed as:
 
-Output[$i$, $j$] $=$ Bias $+$ $\sum_{m=0}^{h-1}$ $\sum_{n=0}^{w-1}$ (Input[$i+m$, $j+n$] * Filter[$m$, $n$])
+$output[i, j] = bias + \sum_{m} \sum_{n} (input[i+m, j+n] * filter[m, n])$ 
 
 where `m` and `n` iterate over the dimensions of the filter (`h`, `w`).
 
