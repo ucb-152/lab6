@@ -1,3 +1,6 @@
 *.DS_STORE
 *__pycache__*
 *.bin
+*.neff
+*.ntff
+*.txt
