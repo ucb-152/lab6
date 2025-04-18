@@ -236,11 +236,48 @@ The prizes for the best performing `conv2d` kernels are as follows:
 
 Now that you are excited to win some prizes, lets get into the task!
 
-### Overview of 2D Convolutions:
-TODO
+### Overview of 2D Convolution
+
+<p align="center">
+  <img width="400" src="./img/conv2d_math.gif">
+  <br>
+  <a href="https://www.geeksforgeeks.org/apply-a-2d-convolution-operation-in-pytorch/">Source</a>
+</p>
+
+2D Convolution is a fundamental operation in deep learning, particularly in Convolutional Neural Networks (CNNs). It is used to extract features from input data, such as images. The operation involves sliding a small weight matrix, called a **filter**, over the input data and performing element-wise multiplications followed by summation (similar to cross-correlation). The result of this operation is a single value, which represents the response of the filter at that specific location. The filter can also have a single **bias** value, that is added to the sum. This process is repeated across the entire input to produce an output matrix, often called a feature map.
+
+The mathematical operation for a single filter application can be expressed as:
+
+Output[$i$, $j$] $=$ Bias $+$ $\sum_{m=0}^{h-1}$ $\sum_{n=0}^{w-1}$ (Input[$i+m$, $j+n$] * Filter[$m$, $n$])
+
+where `m` and `n` iterate over the dimensions of the filter (`h`, `w`).
+
+In the animation above, you can see how a 2D filter slides over the input matrix, performing the convolution operation at each step.
+
+#### Multi-Channel Convolution
+When dealing with data with multiple values at each location (i.e. RBG values in colored images), the input has multiple channels (in this case, in_channels=3). Thus, the filter also has multiple channels, and the convolution operation is extended to include all channels. The filter dimensions become `(in_channels, filter_height, filter_width)`, and the input dimensions are `(in_channels, input_height, input_width)`. There is still only a single bias value per filter.
+
+<p align="center">
+  <img width="400" src="./img/conv2d_3d_3channel.gif">
+  <br>
+  <a href="https://training.galaxyproject.org/training-material/topics/statistics/tutorials/CNN/tutorial.html">Source</a>
+</p>
+
+For each position, the filter performs element-wise multiplications across all channels, and the results are summed to produce a single value in the output feature map. If there are multiple filters, the output will have one feature map per filter, resulting in an output with dimensions `(out_channels, output_height, output_width)`. 
+
+#### Inputs and Outputs to our `conv2d` Kernel
+For the kernel we will be developing, we will take in the following inputs:
+- `X`: Input tensor of shape (`batch_size`, `in_channels`, `input_height`, `input_width`).
+- `W`: Weight tensor of shape (`out_channels`, `in_channels`, `filter_height`, `filter_width`).
+- `bias`: Bias tensor of shape (`out_channels`).
+
+The expected output is:
+- `out_tensor`: Output tensor (`batch_size`, `out_channels`, `output_height`, `output_width`).
+
+Note the addition of the `batch_size`, which is the number of input data elements we are processing in a single batch (e.g doing conv2d on multiple images with the same set of filters). The weight tensor `W` contains `out_channels` number of multi-channel filters, thus the expected `out_tensor` has a feature map(`output_height`, `output_width`) for each filter.
 
 
-### Program `conv2d_nki`
+### Step 0: Files for `conv2d_nki`
 All of the files needed for this part are located in `lab6/nki_conv2d`
 
 To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementations for the 2D Convolution kernels:
@@ -249,15 +286,19 @@ To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementatio
 - `conv2d_numpy_matmul`: A more optimized implementation using tranposing, reshaping, and matrix multiplication
 - `conv2d_numpy_matmul_tiled`: Similar to the `conv2d_numpy_matmul` implementation but with tiling
 
-The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an idea of how to translate the `conv2d` operations into matrix multiplications. Feel free to reshape, tile, and operate on the data however you want, as long as you match the reference model.
+The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an example of how to translate the `conv2d` operations into matrix multiplications, and are not intended to be the optimal solution. Feel free to reshape, tile, and operate on the data however you want, as long as you match the output of the reference model.
 
 To run the reference kernels and benchmark their performance, run the following command.
 ```bash
-python ref_tester.py --benchmark
+python tester_ref.py --benchmark
 ```
+This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter fimensions, and date type.
 
-Note that the PyTorch version will be significantly faster than the NumPy versions, since it as been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
+Note that `conv2d_torch` will be significantly faster than the NumPy versions, since it has been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
 
+
+### Step 1: Brainstorm your implementation
+TODO
 
 #### Brainstorm using NumPy
 If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
