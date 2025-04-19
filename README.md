@@ -317,28 +317,14 @@ This should output the execution times for each of the kernels, as well as the i
 Note that `conv2d_torch` will be significantly faster than the NumPy versions, since it has been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
 
 ### Step 1: Brainstorm your implementation
-TODO
 
 #### Brainstorm using NumPy
 If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
 
 Feel free to comment out the other kernels to only benchmark the kernels you are modifying or developing.
 
-
-## Acknowledgements
-This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter fimensions, and date type.
-
-Note that `conv2d_torch` will be significantly faster than the NumPy versions, since it has been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
-
-
-### Step 1: Brainstorm your implementation
+### Step 2: Program conv2d
 TODO
-
-#### Brainstorm using NumPy
-If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
-
-Feel free to comment out the other kernels to only benchmark the kernels you are modifying or developing.
-
 
 ## Acknowledgements
 The original material for this lab was designed by Ronit Nagarapu in Spring 2025. The Tranium portion of the lab was developed with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments.
