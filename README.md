@@ -150,7 +150,7 @@ python ffnn_ref.py --store-data
 ```
 There should be `*.bin` files in the `ffnn` directory, one for each of the following matrices: `X`, `W1`, `b1`, `W2`, `b2`, and `Y`. We will use these for running and verifying the NKI implementation.
 
-### Step 2: Learn about Neuron Kernel Interface(NKI)
+### Step 2: Learn about Neuron Kernel Interface (NKI)
 In order to program the Tranium devices easily, we will take advantage of AWS's [Neuron Kernel Interface](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/index.html) or NKI. This is a collection of APIs that allow users to program directly in Python and perform computations using the Tranium engines.
 > [!IMPORTANT]
 >
