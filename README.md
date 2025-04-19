@@ -324,7 +324,29 @@ If you want to brainstorm your implementation (reshaping, tiling, loading/storin
 Feel free to comment out the other kernels to only benchmark the kernels you are modifying or developing.
 
 ### Step 2: Program conv2d
+Develop the `conv2d_nki` kernel in `conv2d.py`. 
+
+Once you have completed the kernel, run the following command to simulate your kernel and confirm your implementation works functionally:
+```bash
+python tester.py --simulate
+```
+
+Once you have confirmed functional accuracy, run the full tester to benchmark the kernel and ensure you meet the performance requirements
+```bash
+python tester.py --simulate
+```
+
+#### Optimization Tips
+TODO:
+- Suggestions for mapping and tiling
+- Link to NEURON_PROFILE guide and explain how to use
+
+### Step 3: Submission
 TODO
+
+
+## Conclusion
+
 
 ## Acknowledgements
 The original material for this lab was designed by Ronit Nagarapu in Spring 2025. The Tranium portion of the lab was developed with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments.
