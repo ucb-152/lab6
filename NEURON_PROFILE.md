@@ -2,7 +2,10 @@
 Neuron Profile is an AWS tool to allow users to view the performance metrics of programs run on Neuron Devices like Tranium. Read the [Neuron Profile User Guide](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-profile-user-guide.html) for more detailed information.
 
 ## Installing InfluxDB on DLAMI Trn1
-If you ran the `install.sh` script, this step as already been completed, so you can move on to [Using neuron-profile](#using-neuron-profile) section.
+
+> [!NOTE]
+>
+> If you ran the `install.sh` script, this step as already been completed, so you can move on to [Using neuron-profile](#using-neuron-profile) section.
 
 To install InfluxDB compatible with `neuron-profile`:
 ```bash
@@ -23,24 +26,48 @@ For the setup parameters, enter
 For all other parameters, just click enter to use the default values.
 
 ## Using neuron-profile
-To create the NEFF and NTFF files to run `neuron-profile` with, add the decorator below to the target kernel, replacing the `@nki.jit` decorator.
+
+### Generating NEFF and NTFF Files
+In order to view the execution profile of a NKI kernel you need the NEFF and NTFF files. The NEFF file is the compiled instructions from the python kernel that are actually executed on the NeuronCore. The NTFF file is used to record various metrics of the memory and compute engines while profiling the execution of the kernel. Here are various ways to generate NEFF and NTFF files from NKI kernels.
+
+#### NKI Execution Functions
+To generate a `.neff` file, you can modify how you call the NKI kernel in python as shown below
+```python
+bench_func = nki.benchmark(
+    warmup=5, iters=20, save_neff_name=f"file_name.neff"
+)(kernel)
+bench_func(*args)
+```
+Here is the full description of how to use [nki.benchmark](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.benchmark.html#nki.benchmark). You can generate the NEFF file similarly with [nki.profile](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.profile.html#nki.profile) and [nki.baremetal](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.baremetal.html#nki.baremetal).
+
+#### NKI Decorators
+You can also add these parameters directly to the kernel by changing the python decorator, but usually its easier to leave the decorator as @nki.jit, and choose between normal execution, benchmarking, and profiling in your top-level module or tester script that calls the kernel. Nevertheless, here is how to do it with nki.profile.
+
+Add the decorator below to the target kernel, replacing the `@nki.jit` decorator.
 ```python
 @nki.profile(working_directory="/home/ubuntu/", save_neff_name='nki_kernel.neff', save_trace_name='nki_kernel.ntff', profile_nth=2)
 ```
-Replace the parameters with the names and paths of your choice.
+Replace the parameters with the names and paths of your choice. Note that if you specify `profile_nth`, the trace file will be saved to `{save_trace_name - .ntff}_exec_{profile_nth}.ntff`. So in this case, the trace will be saved to `nki_kernel_exec_2.ntff`.
 
-Then, run the kernel to generate the files. Note that the kernel will no longer have any return values, so disable any verification check you have when you have the profile decorator activated. Replace the python file with the file that calls your nki.profile decorated kernel.
+Then, run the kernel with your top-level module ot tester script to generate the files. Note that the kernel will no longer have any return values, so disable any verification check you have when you have the profile decorator activated. 
 ```bash
-python program.py
+python tester.py
 ```
 
+#### Generating NTFF File from NEFF file
+The NEFF file will be generated, and the NTFF file if you specify `save_trace_name`. If you don't specify `save_trace_name`, you can generate the NTFF file by profiling the NEFF file execution with the command below.
+```bash
+neuron-profile capture -n <neff_file_name> -s <ntff_file_name>
+```
+
+### Viewing Profile with NEFF and NTFF Files
 Finally, use `neuron-profile` to view the profile GUI.
 ```bash
-neuron-profile view -n nki_kernel.neff -s nki_kernel_exec_2.ntff
+neuron-profile view -n <file name>.neff -s <file name>.ntff
 ```
-This will take a while to load, but once it does, click on the link to view the profile GUI.
+This will take a while to load, but once it does, it will output a localhost link you can click to view the GUI.
 
-Make sure you have port forwarding enabled. You can run this command in a seperate terminal on your local machine to enable port forwarding:
+Make sure you have port forwarding enabled. You can run this command in a seperate terminal on your **local machine** to enable port forwarding:
 ```bash
 ssh trn1_cs152 -L 3001:localhost:3001 -L 8086:localhost:8086
 ```
