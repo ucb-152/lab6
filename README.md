@@ -303,7 +303,7 @@ All of the files needed for this part are located in `lab6/nki_conv2d`.
 To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementations for the 2D Convolution kernels:
 - `conv2d_torch`: Built-in PyTorch implementation for [2D Convolution](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html). **Used as the golden model.**
 - `conv2d_numpy`: A naive implementation using NumPy, performing the basic filter application and bias addition. **Intended as a naive functional reference model.**
-- `conv2d_numpy_matmul`: A more optimized implementation using tranposing, reshaping, and matrix multiplication
+- `conv2d_numpy_matmul`: A more optimized implementation using transposing, reshaping, and matrix multiplication
 - `conv2d_numpy_matmul_tiled`: Similar to the `conv2d_numpy_matmul` implementation but with tiling
 
 The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an example of how to translate the `conv2d` operations into matrix multiplications, and are not intended to be the optimal solution. Feel free to reshape, tile, and operate on the data however you want, as long as you match the output of the reference model.
