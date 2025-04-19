@@ -129,7 +129,7 @@ This will allow you to program and develop your kernels locally. Once you are re
 All files needed for the directed portion are located in `lab6/nki_ffnn`.
 - `utils.py`: Utility functions for loading the matrices, and constants for the matrix dimensions
 - `ffnn_ref.py`: Reference NumPy implementation of the Feedforward Neural Network.
-- `ffnn.py`: Main program develop the `ffnn` NKI kernels
+- `ffnn.py`: Main program to develop the `ffnn` NKI kernels.
 - `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with various levels of optimization. 
   - Read the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) for more information. 
 - `kernels.py`: Contains the kernels you will need to implement for the FFNN. 
@@ -296,7 +296,7 @@ Note the addition of the `batch_size`, which is the number of input data element
 All of the files needed for this part are located in `lab6/nki_conv2d`.
 
 - `conv2d_ref.py`: Reference PyTorch and NumPy implementations of the 2D Convolution kernel.
-- `conv2d.py`: Main program to develop the `conv2d` NKI kernels
+- `conv2d.py`: Main program to develop the `conv2d` NKI kernels.
 - `tester_ref.py`: Test and benchmark reference kernel implementations.
 - `tester.py`: Test and benchmark NKI kernel implementation.
 
