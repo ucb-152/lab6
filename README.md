@@ -37,13 +37,18 @@ Systolic arrays are good for kernels like matrix multiplication, as they have hi
 
 
 ### Tranium Overview
-In this lab, we will work on AWS Tranium. These instances contain a single Tranium Device, which has 2 NeuronCores. Each NeuronCore has a HBM (High-bandwidth memory) unit and on-chip storage units that the compute units interface with. Each core has various compute units optimized for different functions:
+In this lab, we will work on AWS Tranium. You can find the full architecture guide here: [Trainium Architecture Guide for NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html), but here is a brief overview: 
+
+
+Tranium instances contain a single Tranium Device, which has 2 NeuronCores. Each NeuronCore has a HBM (High-bandwidth memory) unit and on-chip storage units that the compute units interface with. Each core has various compute units optimized for different functions:
 - Tensor Engine: 128 x 128 systolic array for matrix operations
-- Vector Engine: 128-wide vector unit, reductions, dependent calculations
-- Scalar Engine: 128-wide scalar unit, for activation functions, independent calculations
+- Vector Engine: 128-wide vector unit, reductions, dependent calculations (each output element may depend on multiple input elements)
+- Scalar Engine: 128-wide scalar unit, for activation functions, independent calculations (each output element may depend on a single input element)
 - GpSimd Engine: general-purpose engine for operations not suited for the other engines
 
-The NeuronCores are highly optimized and designed for ML workloads, and thus each engine has its own unique purpose in common ML algorithms. We can get maximal performance out of the chip if we carefully integrate the engines together, making sure that our algorithm is designed such that computations are mapped to the appropriate engines while accounting for bandwidth and throughput constraints for the engines, their internal connections, and the memory system.
+Read the [NeuronCore Compute Engines](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#neuroncore-v2-compute-engines) section of the architecture guide for more details on each engine.
+
+The NeuronCores are highly optimized and designed for ML workloads, and thus each engine has its own unique purpose in common ML algorithms. We can get maximal performance out of the chip if we carefully integrate the engines together. We must make sure that our algorithm is designed such that computations are mapped to the appropriate and most powerful engines while accounting for bandwidth and throughput constraints. We must also plan for communications between engines based their internal connections and the on-chip memory system.
 
 <p align="center">
   <img width="400" src="./img/neuron_device2.png">
@@ -51,7 +56,7 @@ The NeuronCores are highly optimized and designed for ML workloads, and thus eac
   <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch">Source</a>
 </p>
 
-There are various levels of memory at play in the Tranium Instance. There is the host memory that is external to the Neuron Cores. Then, there is the HBM, which is the main on-device memory. Finally there is the on-chip memory, consisting of the SBUF (State Buffer) and the PSUM (Partial Sum Buffer). The levels, sizes, and bandwidths of these memories are shown below.
+There are various levels of memory at play in the Tranium Instance. There is the host memory that is external to the Neuron Cores. Then, there is the HBM, which is the main on-device memory. Finally there is the on-chip memory, consisting of the SBUF (State Buffer) and the PSUM (Partial Sum Buffer). The levels, sizes, and bandwidths of these memories are shown below. When developing kernels, we can also optimize performance by planning our loads and stores based on these architectural parameters and the use of the data in the kernel (i.e. tiling, maximal data resuse, etc).
 
 <p align="center">
   <img width="600" src="./img/memory_hierarchy.png">
@@ -59,7 +64,7 @@ There are various levels of memory at play in the Tranium Instance. There is the
   <a href="https://github.com/stanford-cs149/asst4-trainium/tree/main">Source</a>
 </p>
 
-All computations require loading data from the HBM into the SBUF, which is connected as an input to all of the engines. The output of the Tensor Engine is stored in the PSUM, which can be an input to the Vector and Scalar Engines. The Vector, Scalar, and GpSimd engine can write back to the SBUF. 
+All computations require loading data from the HBM into the SBUF, which is connected as an input to all of the engines. The output of the Tensor Engine is stored in the PSUM, which can be an input to the Vector and Scalar Engines. The Vector, Scalar, and GpSimd engine can write back to the SBUF. Note that the SBUF and PSUM contain 128 partitions each, which are similar to banks of memory. These have connections to the 128 lanes in the Tensor, Scalar, and Vector engines. Thus, optimizing kernels will require tiling memory and compute instructions over the 128 lanes and partitions. Read the [Data Movement](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#data-movement) seciton of the architecture guide for more information.
 
 <p align="center">
   <img width="400" src="./img/neuron_core.png">
@@ -67,7 +72,7 @@ All computations require loading data from the HBM into the SBUF, which is conne
   <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch">Source</a>
 </p>
 
-There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of the all of the compute engines and full memory heirarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
+There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of the all of the compute engines and full memory heirarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide for NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
 
 
 ### Tranium Setup
@@ -124,7 +129,7 @@ git clone <TODO: Insert repo link here>
 cd lab6
 ```
 
-This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub, and pull them on the Tranium instance to simulate or benchmark them. You are allowed to develop your kernels directly while connected to the Tranium instance, but keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time,  
+This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub, and pull them on the Tranium instance to simulate or benchmark them. While you are allowed to develop your kernels directly while connected to the Tranium instance, keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time.
 
 All files needed for the directed portion are located in `lab6/nki_ffnn`.
 - `utils.py`: Utility functions for loading the matrices, and constants for the matrix dimensions
@@ -247,8 +252,9 @@ For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium
 ### Prizes:
 The prizes for the best performing `conv2d` kernels are as follows:
 - 1st Place: $200 Amazon gift card
-- 2nd-4th Place: $100 Amazon gift card
-- Amazon Echo Show
+- 2nd-5th Place: $100 Amazon gift card
+- 6th-nth Place: An Amazon Echo Show
+TODO: replace n 
 
 Now that you are excited to win some prizes, lets get into the task!
 
@@ -306,7 +312,9 @@ To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementatio
 - `conv2d_numpy_matmul`: A more optimized implementation using transposing, reshaping, and matrix multiplication
 - `conv2d_numpy_matmul_tiled`: Similar to the `conv2d_numpy_matmul` implementation but with tiling
 
-The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an example of how to translate the `conv2d` operations into matrix multiplications, and are not intended to be the optimal solution. Feel free to reshape, tile, and operate on the data however you want, as long as you match the output of the reference model.
+Both `conv2d_torch` and `conv2d_numpy` are functionally correct models. The PyTorch implementation is optimized for CPU/GPU -- we are providing it to enable quick checks against your candidate implementations. The NumPy implementation is demonstrating the equivalent mathematical operation described in the [Overview of 2D Convolution](#Overview-of-2D-Convolution) section, but in a python program. Think about the operations performed -- are these the best operations to do on the engines of a NeuronCore?
+
+The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an example of how to translate the `conv2d` operations into matrix multiplications, but this is only one potential mapping. Feel free to reshape, tile, and operate on the data however you want, as long as you match the output of the reference model.
 
 To run the reference kernels and benchmark their performance, run the following command.
 ```bash
@@ -314,9 +322,16 @@ python tester_ref.py --benchmark
 ```
 This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter fimensions, and date type.
 
-Note that `conv2d_torch` will be significantly faster than the NumPy versions, since it has been heavily optimized in the backend. The NumPy implementations are meant to provide a programatic reference for how to code the kernels on NKI. Moreover, the tiled NumPy version may be slightly slower, due to the reshaping and looping, but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
+Note that the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
 
 ### Step 1: Brainstorm your implementation
+
+#### Optimization Tips:
+TODO: 
+- Suggestions for mapping and tiling
+
+#### Brainstorm using NKI Simulate
+TODO
 
 #### Brainstorm using NumPy
 If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
@@ -333,12 +348,11 @@ python tester.py --simulate
 
 Once you have confirmed functional accuracy, run the full tester to benchmark the kernel and ensure you meet the performance requirements
 ```bash
-python tester.py --simulate
+python tester.py
 ```
 
-#### Optimization Tips
+#### Debugging and Optimizing Tips using Neuron Profile
 TODO:
-- Suggestions for mapping and tiling
 - Link to NEURON_PROFILE guide and explain how to use
 
 ### Step 3: Submission
@@ -346,7 +360,9 @@ TODO
 
 
 ## Conclusion
-
+TODO: 
+- Overview of concepts learned
+- Next steps, what to do next if interested
 
 ## Acknowledgements
 The original material for this lab was designed by Ronit Nagarapu in Spring 2025. The Tranium portion of the lab was developed with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments.
