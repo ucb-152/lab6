@@ -3,7 +3,14 @@
 ## Introduction and Goals:
 The goal of this laboratory assignment is to give you an opportunity to program hardware accelerators. As the computational demands of AI and ML applications continue to increase, industry and research efforts have been attempting to meet these demands with Domain Specific Acceleration and custom accelerator hardware. As a result, an increasingly important skill is the ability to map software applications and kernels onto new architectures. 
 
-It is important to learn how to optimize programs to take full advantage of the memory and compute engines available on the target hardware. There are many factors to consider when designing a kernel, such as the communication between compute engines and memory, the amount of data a compute engine can do work on at a given time, the dependencies between different computations in your kernel, and more. By the end of this lab, you should be able to program basic kernels on [NeuronCore](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/neuron-core-v2.html#neuroncores-v2-arch), the main accelerator device in [AWS Tranium](https://aws.amazon.com/ai/machine-learning/trainium/) machines.
+It is important to learn how to optimize programs to take full advantage of the memory and compute engines available on the target hardware. There are many factors to consider when designing a kernel, such as the communication between compute engines and memory, the amount of data a compute engine can work on at a given time, the dependencies between different computations in your kernel, and more. By the end of this lab, you should be able to program basic kernels on [NeuronCore](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/neuron-core-v2.html#neuroncores-v2-arch), the main accelerator device in [AWS Tranium](https://aws.amazon.com/ai/machine-learning/trainium/) machines.
+
+There are two sections of the lab, the Directed and Open-Ended Portions. The Directed Portion is intended to familiarize you with programming for the Tranium accelerator, while the Open-Ended portion will allow you to explore optimizing your programs to get maximal performance out of the hardware. There will be many links to documentation during the lab, and we **highly** recommend you do your best to read them thoroughly. It will be difficult to program the accelerator, and more importantly, it will be tough to optimize your programs without background context.
+
+> [!NOTE]
+>
+> This lab was made possible with the support of AWS, and they will be awarding prizes to the students with the most optimal programs! See the [Open-Ended Prizes](#prizes) section for more details.
+
 
 ### Graded Items:
 All reports are to be submitted through [Gradescope](https://www.gradescope.com/courses/959486)
@@ -19,7 +26,7 @@ All reports are to be submitted through [Gradescope](https://www.gradescope.com/
 
 ## Background:
 ### ML Accelerator Hardware
-In previous labs and lectures, you have learned about various architectures like CPUs (scalar, superscalar, out-of-order, VLIW, etc.), Vector Engines, GPUs, etc. One type of architecture that is prevalent in ML accelerator chips are **systolic arrays**. Systolic array architectures are often used in ML and AI applications because they are suited for computing operations on matrices, which are often used in applications like Neural Networks and Large Language Models. A systolic array is a type of spatial array, which describes a family of architectures that use arrays of compute cells called PEs (Processing Elements), which typically do MAC (Multiply and Accumulate) operations.
+In previous labs and lectures, you have learned about various architectures like CPUs (scalar, superscalar, out-of-order, VLIW, etc.), Vector Engines, GPUs, etc. One type of architecture that is common in ML accelerator chips is the **systolic array**. Systolic array architectures are often used in ML and AI applications because they are suited for computing operations on matrices, which are often used in applications like Neural Networks and Large Language Models. A systolic array is a type of spatial array, a family of architectures that use arrays of compute cells called PEs (Processing Elements), which typically do MAC (Multiply and Accumulate) operations. 
 
 <p align="center">
   <img width="400" src="./img/systolic-array-arch.webp">
@@ -27,7 +34,7 @@ In previous labs and lectures, you have learned about various architectures like
   <a href="https://www.mdpi.com/2079-9292/13/8/1500">Source</a>
 </p>
 
-Systolic arrays are good for kernels like matrix multiplication, as they have high data reuse. From the animation below, you can see that one 3 by 3 matrix is loaded into the PE array, while the other 3 by 9 matrix streams into the PEs. The output 3 by 9 matrix is streamed out of the systolic array after 3 MAC operations (since for a 3x3 by 3x9 matrix multiplication, each row by column inner product is 3 multiply and add operations).
+Systolic arrays are good for kernels like matrix multiplication. From the animation below, you can see that one 3 by 3 matrix is loaded into the PE array, while the other 3 by 9 matrix streams into the PEs. The output 3 by 9 matrix is streamed out of the systolic array after 3 MAC operations (since for a 3x3 by 3x9 matrix multiplication, each row by column inner product is 3 multiply and add operations).
 
 <p align="center">
   <img width="400" src="./img/systolic-array-matmul-animation.gif">
@@ -40,7 +47,7 @@ Systolic arrays are good for kernels like matrix multiplication, as they have hi
 In this lab, we will work on AWS Tranium. You can find the full architecture guide here: [Trainium Architecture Guide for NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html), but here is a brief overview: 
 
 
-Tranium instances contain a single Tranium Device, which has 2 NeuronCores. Each NeuronCore has a HBM (High-bandwidth memory) unit and on-chip storage units that the compute units interface with. Each core has various compute units optimized for different functions:
+Tranium instances contain a single Tranium Device, which has 2 NeuronCores. Each NeuronCore has an HBM (High-bandwidth memory) unit and on-chip storage units that the compute units interface with. Each core has various compute units optimized for different functions:
 - Tensor Engine: 128 x 128 systolic array for matrix operations
 - Vector Engine: 128-wide vector unit, reductions, dependent calculations (each output element may depend on multiple input elements)
 - Scalar Engine: 128-wide scalar unit, for activation functions, independent calculations (each output element may depend on a single input element)
@@ -48,7 +55,7 @@ Tranium instances contain a single Tranium Device, which has 2 NeuronCores. Each
 
 Read the [NeuronCore Compute Engines](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#neuroncore-v2-compute-engines) section of the architecture guide for more details on each engine.
 
-The NeuronCores are highly optimized and designed for ML workloads, and thus each engine has its own unique purpose in common ML algorithms. We can get maximal performance out of the chip if we carefully integrate the engines together. We must make sure that our algorithm is designed such that computations are mapped to the appropriate and most powerful engines while accounting for bandwidth and throughput constraints. We must also plan for communications between engines based their internal connections and the on-chip memory system.
+The NeuronCores are highly optimized and designed for ML workloads, and thus, each engine has its own unique purpose in common ML algorithms. We can get maximal performance out of the chip if we carefully integrate the engines together. We must make sure that our algorithm is designed such that computations are mapped to the appropriate and most powerful engines while accounting for bandwidth and throughput constraints. We must also plan for communications between engines based on their internal connections and the on-chip memory system.
 
 <p align="center">
   <img width="400" src="./img/neuron_device2.png">
@@ -56,7 +63,7 @@ The NeuronCores are highly optimized and designed for ML workloads, and thus eac
   <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch">Source</a>
 </p>
 
-There are various levels of memory at play in the Tranium Instance. There is the host memory that is external to the Neuron Cores. Then, there is the HBM, which is the main on-device memory. Finally there is the on-chip memory, consisting of the SBUF (State Buffer) and the PSUM (Partial Sum Buffer). The levels, sizes, and bandwidths of these memories are shown below. When developing kernels, we can also optimize performance by planning our loads and stores based on these architectural parameters and the use of the data in the kernel (i.e. tiling, maximal data resuse, etc).
+There are various levels of memory at play in the Tranium Instance. There is the host memory that is external to the Neuron Cores. Then, there is the HBM, which is the main on-device memory. Finally, there is the on-chip memory, consisting of the SBUF (State Buffer) and the PSUM (Partial Sum Buffer). The levels, sizes, and bandwidths of these memories are shown below. When developing kernels, we can also optimize performance by planning our loads and stores based on these architectural parameters and the use of the data in the kernel (i.e. tiling, maximal data reuse, etc).
 
 <p align="center">
   <img width="600" src="./img/memory_hierarchy.png">
@@ -64,7 +71,7 @@ There are various levels of memory at play in the Tranium Instance. There is the
   <a href="https://github.com/stanford-cs149/asst4-trainium/tree/main">Source</a>
 </p>
 
-All computations require loading data from the HBM into the SBUF, which is connected as an input to all of the engines. The output of the Tensor Engine is stored in the PSUM, which can be an input to the Vector and Scalar Engines. The Vector, Scalar, and GpSimd engine can write back to the SBUF. Note that the SBUF and PSUM contain 128 partitions each, which are similar to banks of memory. These have connections to the 128 lanes in the Tensor, Scalar, and Vector engines. Thus, optimizing kernels will require tiling memory and compute instructions over the 128 lanes and partitions. Read the [Data Movement](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#data-movement) seciton of the architecture guide for more information.
+All computations require loading data from the HBM into the SBUF, which is connected as an input to all of the engines. The output of the Tensor Engine is stored in the PSUM, which can be an input to the Vector and Scalar Engines. The Vector, Scalar, and GpSimd engines can write back to the SBUF. Note that the SBUF and PSUM contain 128 partitions each, which are similar to banks of memory. These have connections to the 128 lanes in the Tensor, Scalar, and Vector engines. Thus, optimizing kernels will require tiling memory and compute instructions over the 128 lanes and partitions. Read the [Data Movement](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#data-movement) section of the architecture guide for more information.
 
 <p align="center">
   <img width="400" src="./img/neuron_core.png">
@@ -72,7 +79,7 @@ All computations require loading data from the HBM into the SBUF, which is conne
   <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch">Source</a>
 </p>
 
-There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of the all of the compute engines and full memory heirarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide for NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
+There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of all of the compute engines and full memory hierarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide for NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
 
 
 ### Tranium Setup
@@ -83,8 +90,8 @@ To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETU
 > Do not proceed with the rest of the lab without completing this step.
 
 
-## Directed Portion
-For the Directed portion, you are tasked with developing a `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familarize yourself with the Tranium and NeuronCore architecture, and how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
+## Directed Portion (
+For the Directed portion, you are tasked with developing an `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familiarize yourself with the Tranium and NeuronCore architecture, and how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
 
 ### Overview of Feedforward Neural Networks
 
@@ -96,16 +103,19 @@ For the Directed portion, you are tasked with developing a `ffnn` (Feedforward N
 
 A feedforward neural network is a type of neural network where the information flows through the layers in one direction. We start with the input layer, which recieves the initial data, with each neuron acting as a feature of the input data. 
 
-Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This is calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples (often referred to as the batch size), and `d` is the number of input features. Each connection between layers can be represented by a weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. 
+Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples (often referred to as the batch size), and `d` is the number of input features. Each connection between layers can be represented by a weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. 
 
-You can calculate the activations of the next layer of neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/) (typically used on the hidden layers) or [Softmax](https://www.geeksforgeeks.org/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/) (typically used on the output layer). The bias vector is broadcasted to the dimensions `(d, h)` and thus the bias vector is added to each row of the `XW` matmul result. We can continue with similar caculations for each layer, until we reach the output layer. This process of taking the inputs and stepping through the layers of the neural network, until we reach the output layer, is known as the **forward pass**.
+You can calculate the activations of the next layer of neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/) (typically used on the hidden layers) or [Softmax](https://www.geeksforgeeks.org/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/) (typically used on the output layer). The bias vector is broadcasted to the dimensions `(d, h)` and thus the bias vector is added to each row of the `XW` matmul result. We can continue with similar calculations for each layer, until we reach the output layer. This process of taking the inputs and stepping through the layers of the neural network, until we reach the output layer, is known as the **forward pass**.
 
 The output layer contains the activations of the neurons that correspond to the output of the neural network. For example, in a classification problem, each neuron could correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is **predicting** for the input.  
 
-If you would like to learn more on feedforward neural networks, check out this article on [Feedforward Neural Networks](https://www.geeksforgeeks.org/feedforward-neural-network/). 
+If you would like to learn more about feedforward neural networks, check out this article on [Feedforward Neural Networks](https://www.geeksforgeeks.org/feedforward-neural-network/). 
 
 ### Step 0: Setup
-To begin, ssh into your Tranium instance or open a remote session using VSCode (or another application). 
+
+TODO: GitHub Classroom
+
+After you have created your project repo with GitHub Classroom, launch your Tranium instance and connect to it via SSH, a remote session using VSCode, or another application. 
 
 Once you have logged into the instance, clone the lab repo. 
 ```bash
@@ -117,13 +127,13 @@ Finally, run the `install.sh` script.
 ```bash
 source install.sh
 ```
-The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), that contains all the dependencies needed for the assignment. It will also modify your ~/.bashrc file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
+The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), which contains all the dependencies needed for the assignment. It will also modify your ~/.bashrc file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
 
 > [!IMPORTANT]
 > 
 > Now, shut down your instance before proceeding
 
-Clone the github repo to your local machine too
+Clone the GitHub repo to your local machine 
 ```bash
 git clone <TODO: Insert repo link here>
 cd lab6
@@ -132,7 +142,7 @@ cd lab6
 This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub, and pull them on the Tranium instance to simulate or benchmark them. While you are allowed to develop your kernels directly while connected to the Tranium instance, keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time.
 
 All files needed for the directed portion are located in `lab6/nki_ffnn`.
-- `utils.py`: Utility functions for loading the matrices, and constants for the matrix dimensions
+- `utils.py`: Utility functions for loading the matrices and constants for the matrix dimensions
 - `ffnn_ref.py`: Reference NumPy implementation of the Feedforward Neural Network.
 - `ffnn.py`: Main program to develop the `ffnn` NKI kernels.
 - `matmul_kernels.py`: Matrix Multiplication kernels developed by AWS, with various levels of optimization. 
@@ -147,7 +157,7 @@ To start, first take a look at `ffnn_ref.py` for a Numpy implementation of the F
 ```bash
 python ffnn_ref.py --benchmark
 ```
-You should see that the prediction operation takes roughly 440-450ms to run using Python and Numpy. Keep this figure in mind when comparing to the performance of the kernel on Tranium using NKI.
+You should see that the prediction operation takes roughly 440 to 450ms to run using Python and Numpy. Keep this figure in mind when comparing to the performance of the kernel on Tranium using NKI.
 
 Now, run the program again with the following command-line flags to store the input data and golden model results. 
 ```bash
@@ -238,11 +248,13 @@ Run the following command to benchmark the `nki_predict` kernel, using the diffe
 ```bash
 python ffnn.py --benchmark
 ```
+
+TODO: Remove report questions? 
 - Compare the latency of the "tiled" matmul vs the reference numpy implementation. How much faster is the NKI implementation?
-- Compare the latencies of the various matmul kernels. Record any trends or outliers you notice, and give a brief explanation for your observations.
+- Compare the latencies of the various matmul kernels. Note any trends or outliers you notice, and give a brief explanation for your observations.
 
 ### Step 9: Submission
-TODO
+Once you have successfully completed the steps above, you are finished with the directed portion! Submit to Gradescope  
 
 
 
