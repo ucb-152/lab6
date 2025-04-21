@@ -353,11 +353,21 @@ Run the following command to simulate your kernel and confirm your implementatio
 ```bash
 python tester.py --simulate
 ```
+Once you know your kernel works functionally, you can move onto the next step to benchmark your kernel to test its speed and performance.
 
 #### Brainstorm using NumPy
-If you want to brainstorm your implementation on your local computer, you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. Feel free to comment out the other kernels on line 115 of `ref_tester.py` to only benchmark the kernels you are modifying or developing.
+If you want to brainstorm your implementation on your local computer, you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. Feel free to comment out the other kernels on line 115 of `ref_tester.py` to only benchmark the kernels you are modifying or developing. 
 
 By brainstorming on NumPy, you can quickly confirm that your approach is functionally correct (i.e. correct outputs), before using up your credits and time on the Tranium instance. However, we recommend you spend most of your time developing directly on NKI, to make sure your mapping is actually compatible/achievable with the NKI APIs and NeuronCore.
+
+Run the following command to simulate your kernel and confirm your implementation works functionally:
+```bash
+python tester_ref.py 
+```
+
+> [!NOTE]
+>
+> Remember, the speed of your kernel on NumPy may give some insights on relative performance gain, but ultimately, they won't be accurate to the execution on Tranium with NKI. You should use NumPy brainstorming simply to ensure functional accuracy, and then immediately move to NKI for performance testing and benchmarking. Thus, there is no need to add the `--benchmark` flag to the above command. 
 
 
 ### Step 2: Program and optimize conv2d
