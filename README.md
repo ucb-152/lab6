@@ -91,7 +91,7 @@ To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETU
 
 
 ## Directed Portion (30%)
-For the Directed portion, you are tasked with developing an `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familiarize yourself with the Tranium and NeuronCore architecture, and how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
+For the Directed portion, you are tasked with developing an `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familiarize yourself with the Tranium and NeuronCore architecture, and learn how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
 
 ### Overview of Feedforward Neural Networks
 
@@ -105,7 +105,7 @@ A feedforward neural network is a type of neural network where the information f
 
 Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples (often referred to as the batch size), and `d` is the number of input features. Each connection between layers can be represented by a weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. 
 
-You can calculate the activations of the next layer of neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/) (typically used on the hidden layers) or [Softmax](https://www.geeksforgeeks.org/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/) (typically used on the output layer). The bias vector is broadcasted to the dimensions `(d, h)` and thus the bias vector is added to each row of the `XW` matmul result. We can continue with similar calculations for each layer, until we reach the output layer. This process of taking the inputs and stepping through the layers of the neural network, until we reach the output layer, is known as the **forward pass**.
+You can calculate the activations of the next layer of neurons with the equation `H = ACT(XW+b)`, where `ACT` is some activation function like [ReLu](https://www.geeksforgeeks.org/relu-activation-function-in-deep-learning/) (typically used on the hidden layers) or [Softmax](https://www.geeksforgeeks.org/the-role-of-softmax-in-neural-networks-detailed-explanation-and-applications/) (typically used on the output layer). The bias vector is broadcasted to the dimensions `(d, h)` and thus the bias vector is added to each row of the `XW` matmul result. We can continue with similar calculations for each layer until we reach the output layer. This process of taking the inputs and stepping through the layers of the neural network, until we reach the output layer, is known as the **forward pass**.
 
 The output layer contains the activations of the neurons that correspond to the output of the neural network. For example, in a classification problem, each neuron could correspond to a class, and the neuron with the highest activation (i.e. the highest probability) would be the class that the neural network is **predicting** for the input.  
 
@@ -139,7 +139,7 @@ git clone <TODO: Insert repo link here>
 cd lab6
 ```
 
-This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub, and pull them on the Tranium instance to simulate or benchmark them. While you are allowed to develop your kernels directly while connected to the Tranium instance, keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time.
+This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub and pull them on the Tranium instance to simulate or benchmark them. While you are allowed to develop your kernels directly while connected to the Tranium instance, keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time.
 
 All files needed for the directed portion are located in `lab6/nki_ffnn`.
 - `utils.py`: Utility functions for loading the matrices and constants for the matrix dimensions
@@ -181,10 +181,10 @@ An important detail is that NKI operations often have dimension restrictions due
 
 
 ### Step 3: Program the nki_transpose kernel
-In this part, we will develop the tranpose kernel, which will allow us to use the matmul kernels that expect a transposed input. As mentioned in the guides, there are three main stages to programming a NKI kernel: 1) Load inputs, 2) Perform computation, and 3) Store outputs. For `nki_tranpose`, we are not really performing any computation, but we can consider "transposing" as the desired modification to the input data. 
+In this part, we will develop the transpose kernel, which will allow us to use the matmul kernels that expect a transposed input. As mentioned in the guides, there are three main stages to programming a NKI kernel: 1) Load inputs, 2) Perform computation, and 3) Store outputs. For `nki_tranpose`, we are not really performing any computation, but we can consider "transposing" as the desired modification to the input data. 
 
 Fill in the blanks to implement the `nki_transpose` kernel in `kernels.py`. 
-- Hint 1: there is a NKI API that does a combined load and transpose of a tile.
+- Hint 1: There is a NKI API that does a combined load and transpose of a tile.
 - Hint 2: Use `nl.tile_size.pmax` to get the max partition dimension. Remember, the partition dimension is the first index unless otherwise specified ([Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)).
 - Hint 3: Use iterators to loop through the indices when tiling: [NKI Language (Iterators)](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#iterators)
 
@@ -221,7 +221,7 @@ python tester.py --test-forward
 ```
 
 ### Step 6: Program the nki_predict kernel
-Now, we will combine all our kernels to get the probability distribution from the forward pass, and identify our output classes.
+Now, we will combine all our kernels to get the probability distribution from the forward pass and identify our output classes.
 1. Fill in the blank to get the `probs` matrix, which corresponds to the probability of each of the output classes for each of the inputs
 2. Select the index of the highest probability per input (i.e. per row), and place that in the `predictions` array. Do not use numpy.argmax or another raw python method for this. Use the NKI APIs.
 3. Return the `predictions` array
@@ -229,7 +229,7 @@ Now, we will combine all our kernels to get the probability distribution from th
 Follow the steps above to implement the `nki_predict` kernel in `kernels.py`. 
 
 - Hint 1: You don't need to program much for Step 1
-- Hint 2: You may need to break Step 2 into two seperate steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need for this can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
+- Hint 2: You may need to break Step 2 into two separate steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need for this can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
 
 Once you have completed the kernel, run the following command to confirm your implementation works:
 ```bash
@@ -241,7 +241,7 @@ Once you have completed all of the above steps, your NKI FFNN kernel should be c
 ```bash
 python ffnn.py
 ```
-If you get the message: "Predictions match the golden model." then you have succesfully completed the above steps, and can proceed to the next step. Otherwise, make sure to fix your kernels before proceeding.
+If you get the message: "Predictions match the golden model," then you have successfully completed the above steps and can proceed to the next step. Otherwise, make sure to fix your kernels before proceeding.
 
 ### Step 8: Benchmark nki_predict
 Run the following command to benchmark the `nki_predict` kernel, using the different matmul kernels. 
@@ -259,7 +259,7 @@ TODO: Add Gradescope submission instructions
 
 
 ## Open-Ended Portion (70%)
-For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium, and optimizing it as much as possible! This assignment should be completed individually, and the most performant kernels will recieve prizes from AWS!
+For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium and optimizing it as much as possible! This assignment should be completed individually, and the most performant kernels will receive prizes from AWS!
 
 ### Prizes:
 The prizes for the best performing `conv2d` kernels are as follows:
@@ -268,7 +268,7 @@ The prizes for the best performing `conv2d` kernels are as follows:
 - 6th-nth Place: An Amazon Echo Show
 TODO: replace n 
 
-Now that you are excited to win some prizes, lets get into the task!
+Now that you are excited to win some prizes, let's get into the task!
 
 ### Overview of 2D Convolution
 
@@ -278,7 +278,7 @@ Now that you are excited to win some prizes, lets get into the task!
   <a href="https://www.geeksforgeeks.org/apply-a-2d-convolution-operation-in-pytorch/">Source</a>
 </p>
 
-2D Convolution is a fundamental operation in deep learning, particularly in Convolutional Neural Networks (CNNs). It is used to extract features from input data, such as images. The operation involves sliding a small weight matrix, called a **filter**, over the input data and performing element-wise multiplications followed by summation (similar to cross-correlation). The result of this operation is a single value, which represents the response of the filter at that specific location. The filter can also have a single **bias** value, that is added to the sum. This process is repeated across the entire input to produce an output matrix, often called a feature map.
+2D Convolution is a fundamental operation in deep learning, particularly in Convolutional Neural Networks (CNNs). It is used to extract features from input data, such as images. The operation involves sliding a small weight matrix, called a **filter**, over the input data and performing element-wise multiplications followed by summation (similar to cross-correlation). The result of this operation is a single value, which represents the response of the filter at that specific location. The filter can also have a single **bias** value, which is added to the sum. This process is repeated across the entire input to produce an output matrix, often called a feature map.
 
 The mathematical operation for a single filter application can be expressed as:
 
@@ -308,7 +308,7 @@ For the kernel we will be developing, we will take in the following inputs:
 The expected output is:
 - `out_tensor`: Output tensor (`batch_size`, `out_channels`, `output_height`, `output_width`).
 
-Note the addition of the `batch_size`, which is the number of input data elements we are processing in a single batch (e.g doing conv2d on multiple images with the same set of filters). The weight tensor `W` contains an `out_channels` number of multi-channel filters, thus the expected `out_tensor` has a feature map(`output_height`, `output_width`) for each filter. The `out_tensor` contains this set of feature maps for all of the images in the original batch input.
+Note the addition of the `batch_size`, which is the number of input data elements we are processing in a single batch (e.g doing conv2d on multiple images with the same set of filters). The weight tensor `W` contains an `out_channels` number of multi-channel filters, thus, the expected `out_tensor` has a feature map(`output_height`, `output_width`) for each filter. The `out_tensor` contains this set of feature maps for all of the images in the original batch input.
 
 ### Step 0: Files for `conv2d_nki`
 All of the files needed for this part are located in `lab6/nki_conv2d`.
@@ -332,19 +332,19 @@ To run the reference kernels and benchmark their performance, run the following 
 ```bash
 python tester_ref.py --benchmark
 ```
-This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter fimensions, and date type.
+This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter dimensions, and data type.
 
 Note that the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
 
 ### Step 1: Brainstorm your implementation
-Before jumping directly into programming your kernel, take some time to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc). Optimizing a kernel for powerful custom accelerator is not a simple task! The amount of time your spend researching and preparing before development will considerably improve your experience. You will mitigate the amount of issues you will have to debug and potentially improve the end performance of your kernel by thinking about the optimizations in advance. 
+Before jumping directly into programming your kernel, take some time to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc). Optimizing a kernel for a powerful custom accelerator is not a simple task! The amount of time you spend researching and preparing before development will considerably improve your experience. You will mitigate the number of issues you will have to debug and potentially improve the end performance of your kernel by thinking about the optimizations in advance. 
 
 #### Optimization Tips:
 When mapping an algorithm or computation to a target hardware, here are some factors to take into consideration:
 - What hardware is available? In our case, what engines are available, and what are their capabilities, internal connections, throughputs, etc?
-- What is the memory system for our data? What hierarchy do we have, and what are the different levels of speed and storage size? What are the connections from the memory systems to the compute engines?
+- What is the memory system for our data? What hierarchy do we have, and what are the different levels of speed and storage size? What are the connections between memory systems and compute engines?
 - How is our algorithm and program structured? What are the data dependencies, and what data is reused in multiple computations? 
-- Does the original computation have operations suited for the available compute hardware, or do we need to restructure the operations to efectively use our target architecture?
+- Does the original computation have operations suited for the available compute hardware, or do we need to restructure the operations to effectively use our target architecture?
 
 #### Brainstorm using NKI Simulate
 Once you have an idea of how you want to implement your kernel, you can program it in the `conv2d_nki` function in `conv2d.py`. Then, you can quickly test the kernel for functional accuracy using `nki.simulate_kernel`.
@@ -353,12 +353,12 @@ Run the following command to simulate your kernel and confirm your implementatio
 ```bash
 python tester.py --simulate
 ```
-Once you know your kernel works functionally, you can move onto the next step to benchmark your kernel to test its speed and performance.
+Once you know your kernel works functionally, you can move on to the next step to benchmark your kernel to test its speed and performance.
 
 #### Brainstorm using NumPy
 If you want to brainstorm your implementation on your local computer, you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. Feel free to comment out the other kernels on line 115 of `ref_tester.py` to only benchmark the kernels you are modifying or developing. 
 
-By brainstorming on NumPy, you can quickly confirm that your approach is functionally correct (i.e. correct outputs), before using up your credits and time on the Tranium instance. However, we recommend you spend most of your time developing directly on NKI, to make sure your mapping is actually compatible/achievable with the NKI APIs and NeuronCore.
+By brainstorming on NumPy, you can quickly confirm that your approach is functionally correct (i.e. correct outputs), before using up your credits and time on the Tranium instance. However, we recommend you spend most of your time developing directly on NKI to make sure your mapping is actually compatible/achievable with the NKI APIs and NeuronCore.
 
 Run the following command to simulate your kernel and confirm your implementation works functionally:
 ```bash
@@ -382,12 +382,12 @@ Once you have confirmed functional accuracy, run the full tester to benchmark th
 ```bash
 python tester.py
 ```
-If the script says you have met the performance requirements, you are done! You may submit your kernel for full credit. The competition winners will be decided based on the best performance, so once you meet the minimum requirements, we encourage you to try an optimize your kernel even further.
+If the script says you have met the performance requirements, you are done! You may submit your kernel for full credit. The competition winners will be decided based on the best performance, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further.
 
-TODO: Upgrade tester for more thorough fleet of input parameters and test cases.
+TODO: Upgrade tester for a more thorough fleet of input parameters and test cases.
 
 #### Debugging and Optimizing Tips using Neuron Profile
-If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements inyour performance by simply ensuring your kernel maps the the hardware parameters and architecture details.
+If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements in your performance by simply ensuring your kernel maps properly to the hardware parameters and architecture details.
 
 Nevertheless, there is also a way to get more detailed performance metrics of the execution of your kernel, using AWS's Neuron Profile. Read the [Neuron Profile User Guide](/NEURON_PROFILE.md) for more information.
 
@@ -401,7 +401,7 @@ Nevertheless, there is also a way to get more detailed performance metrics of th
 Once you have successfully completed the steps above, you are finished with the open-ended portion! 
 
 TODO: Add Gradescope submission instructions
-TODO: Add competiiton leaderboard details
+TODO: Add competition leaderboard details
 
 
 ## Conclusion
