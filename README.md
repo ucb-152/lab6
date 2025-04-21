@@ -13,7 +13,7 @@ There are two sections of the lab, the Directed and Open-Ended Portions. The Dir
 
 
 ### Graded Items:
-All reports are to be submitted through [Gradescope](https://www.gradescope.com/courses/959486)
+All graded items are to be submitted through [Gradescope](https://www.gradescope.com/courses/959486)
 
 > [!IMPORTANT] 
 > 
@@ -90,7 +90,7 @@ To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETU
 > Do not proceed with the rest of the lab without completing this step.
 
 
-## Directed Portion (
+## Directed Portion (30%)
 For the Directed portion, you are tasked with developing an `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familiarize yourself with the Tranium and NeuronCore architecture, and how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
 
 ### Overview of Feedforward Neural Networks
@@ -258,7 +258,7 @@ Once you have successfully completed the steps above, you are finished with the 
 
 
 
-## Open-Ended Portion
+## Open-Ended Portion (70%)
 For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium, and optimizing it as much as possible! This assignment should be completed individually, and the most performant kernels will recieve prizes from AWS!
 
 ### Prizes:
@@ -372,9 +372,7 @@ TODO
 
 
 ## Conclusion
-TODO: 
-- Overview of concepts learned
-- Next steps, what to do next if interested
+In this lab, you explored the architecture and programming of ML accelerators, specifically the AWS Tranium device. You learned about the key components of ML accelerators, such as systolic arrays, memory hierarchies, and specialized compute engines, and how these components are optimized for machine learning workloads. By implementing kernels using the Neuron Kernel Interface (NKI), you gained hands-on experience in mapping ML algorithms to a target hardware, customizing the iteration, computations, memory management, and more to achieve high performance. By completing this lab, you have gained valuable skills in programming domain-specific accelerators, a critical area in modern computing. These skills will be increasingly relevant as the demand for efficient AI and ML solutions continues to grow.
 
 ## Acknowledgements
 The original material for this lab was designed by Ronit Nagarapu in Spring 2025. The Tranium portion of the lab was developed with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments.
