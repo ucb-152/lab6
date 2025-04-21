@@ -71,3 +71,6 @@ Make sure you have port forwarding enabled. You can run this command in a sepera
 ```bash
 ssh trn1_cs152 -L 3001:localhost:3001 -L 8086:localhost:8086
 ```
+
+### Interpretting the Neuron Profile GUI
+TODO

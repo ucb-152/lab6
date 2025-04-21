@@ -249,13 +249,13 @@ Run the following command to benchmark the `nki_predict` kernel, using the diffe
 python ffnn.py --benchmark
 ```
 
-TODO: Remove report questions? 
 - Compare the latency of the "tiled" matmul vs the reference numpy implementation. How much faster is the NKI implementation?
-- Compare the latencies of the various matmul kernels. Note any trends or outliers you notice, and give a brief explanation for your observations.
+- Compare the latencies of the various matmul kernels. Note any trends or outliers, and take a look at the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) to try and understand the changes in latency.
 
 ### Step 9: Submission
-Once you have successfully completed the steps above, you are finished with the directed portion! Submit to Gradescope  
+Once you have successfully completed the steps above, you are finished with the directed portion! 
 
+TODO: Add Gradescope submission instructions
 
 
 ## Open-Ended Portion (70%)
@@ -337,38 +337,61 @@ This should output the execution times for each of the kernels, as well as the i
 Note that the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
 
 ### Step 1: Brainstorm your implementation
+Before jumping directly into programming your kernel, take some time to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc). Optimizing a kernel for powerful custom accelerator is not a simple task! The amount of time your spend researching and preparing before development will considerably improve your experience. You will mitigate the amount of issues you will have to debug and potentially improve the end performance of your kernel by thinking about the optimizations in advance. 
 
 #### Optimization Tips:
-TODO: 
-- Suggestions for mapping and tiling
+When mapping an algorithm or computation to a target hardware, here are some factors to take into consideration:
+- What hardware is available? In our case, what engines are available, and what are their capabilities, internal connections, throughputs, etc?
+- What is the memory system for our data? What hierarchy do we have, and what are the different levels of speed and storage size? What are the connections from the memory systems to the compute engines?
+- How is our algorithm and program structured? What are the data dependencies, and what data is reused in multiple computations? 
+- Does the original computation have operations suited for the available compute hardware, or do we need to restructure the operations to efectively use our target architecture?
 
 #### Brainstorm using NKI Simulate
-TODO
+Once you have an idea of how you want to implement your kernel, you can program it in the `conv2d_nki` function in `conv2d.py`. Then, you can quickly test the kernel for functional accuracy using `nki.simulate_kernel`.
 
-#### Brainstorm using NumPy
-If you want to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc), you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. This way, before you move to programming using NKI, you can confirm that your approach is functionally correct (i.e. correct outputs). 
-
-Feel free to comment out the other kernels to only benchmark the kernels you are modifying or developing.
-
-### Step 2: Program conv2d
-Develop the `conv2d_nki` kernel in `conv2d.py`. 
-
-Once you have completed the kernel, run the following command to simulate your kernel and confirm your implementation works functionally:
+Run the following command to simulate your kernel and confirm your implementation works functionally:
 ```bash
 python tester.py --simulate
 ```
 
-Once you have confirmed functional accuracy, run the full tester to benchmark the kernel and ensure you meet the performance requirements
+#### Brainstorm using NumPy
+If you want to brainstorm your implementation on your local computer, you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. Feel free to comment out the other kernels on line 115 of `ref_tester.py` to only benchmark the kernels you are modifying or developing.
+
+By brainstorming on NumPy, you can quickly confirm that your approach is functionally correct (i.e. correct outputs), before using up your credits and time on the Tranium instance. However, we recommend you spend most of your time developing directly on NKI, to make sure your mapping is actually compatible/achievable with the NKI APIs and NeuronCore.
+
+
+### Step 2: Program and optimize conv2d
+Develop and optimize the `conv2d_nki` kernel in `conv2d.py`.
+
+Run the following command to simulate your kernel and confirm your implementation works functionally:
+```bash
+python tester.py --simulate
+```
+
+Once you have confirmed functional accuracy, run the full tester to benchmark the kernel and check its performance.
 ```bash
 python tester.py
 ```
+If the script says you have met the performance requirements, you are done! You may submit your kernel for full credit. The competition winners will be decided based on the best performance, so once you meet the minimum requirements, we encourage you to try an optimize your kernel even further.
+
+TODO: Upgrade tester for more thorough fleet of input parameters and test cases.
 
 #### Debugging and Optimizing Tips using Neuron Profile
-TODO:
-- Link to NEURON_PROFILE guide and explain how to use
+If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements inyour performance by simply ensuring your kernel maps the the hardware parameters and architecture details.
+
+Nevertheless, there is also a way to get more detailed performance metrics of the execution of your kernel, using AWS's Neuron Profile. Read the [Neuron Profile User Guide](/NEURON_PROFILE.md) for more information.
+
+<p align="center">
+  <img width="600" src="./img/neuron_profile_timeline.png">
+  <br>
+  <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-profile-user-guide.html">Source</a>
+</p>
 
 ### Step 3: Submission
-TODO
+Once you have successfully completed the steps above, you are finished with the open-ended portion! 
+
+TODO: Add Gradescope submission instructions
+TODO: Add competiiton leaderboard details
 
 
 ## Conclusion
