@@ -13,16 +13,11 @@ There are two sections of the lab, the Directed and Open-Ended Portions. The Dir
 
 
 ### Graded Items:
-All graded items are to be submitted through [Gradescope](https://www.gradescope.com/courses/959486)
+All graded items are to be submitted through [Gradescope](https://www.gradescope.com/courses/959486). The Directed and Open-Ended portions of the lab must both be completed individually, unless otherwise approved by course staff. The Directed portion is worth 30% of your lab grade, and the Open-Ended portion is worth 70% of your lab grade. 
 
-> [!IMPORTANT] 
-> 
-> TODO: Add details on assignment here:
-> - Link to Gradescope Assignment
-> - Directed vs Open-Ended split?
-> - Submission details for each question
-> - Page limits
+The Directed and Open-Ended portion are both due **Friday, May 2 at 11:59PM**. You may continue to optimize your Open-Ended kernels for the competition until **Friday, May 9 at 11:59PM**, after which the competition will be closed and the prizes awarded. 
 
+Finally, after completing the lab, you will need to fill out a feedback form. This helps us improve this lab and previous labs for future versions of the course. Any feedback, positive or negative, is greatly appreciated!
 
 ## Background:
 ### ML Accelerator Hardware
@@ -82,12 +77,76 @@ All computations require loading data from the HBM into the SBUF, which is conne
 There are a lot of factors at play when writing kernels on Tranium devices, and good kernels will take advantage of all of the compute engines and full memory hierarchy to reduce bottlenecks and extract the most performance. For more details on Tranium architecture, look at the [Tranium Architecture Guide for NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/arch/trainium_inferentia2_arch.html#trainium-inferentia2-arch).
 
 
-### Tranium Setup
+## Setup
+Follow the steps below to setup the Tranium instance you will be using for the lab.
+
+### Launch and Configure Tranium Instance
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
 
 > [!IMPORTANT] 
 > 
 > Do not proceed with the rest of the lab without completing this step.
+
+### Setup Repository and Environment
+
+#### Setup GitHub Classroom Repository
+To begin, accept the GitHub Classroom invite sent to your @berkeley.edu email. This will create a personal repo for you to push your code and track your work. After you have created your project repo with GitHub Classroom, launch your Tranium instance and connect to it via SSH, a remote session using VSCode, or another application. 
+
+Once you have logged into the instance, make sure you have GitHub configured.
+
+- [Configure your name in git](https://docs.github.com/en/get-started/getting-started-with-git/setting-your-username-in-git)
+- [Configure your email address in git](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address#setting-your-commit-email-address-in-git).
+  Use your Berkeley email address.
+- [Create an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=linux#generating-a-new-ssh-key).
+  If you create your SSH key with a password, you'll need to type your password every time you push/pull. We recommend leaving the password blank, but it's your choice.
+- [Add the SSH key to your GitHub account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account#adding-a-new-ssh-key-to-your-account).
+
+Once you are done, be sure that you can authenticate to GitHub via SSH by running:
+
+```bash
+ssh -T git@github.com
+```
+
+If you have configured things correctly, you should see something like this:
+```bash
+Hi <YOUR GITHUB USERNAME>! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+Finally, clone the repository your created eariler on GitHub Classroom, and add this repo as a skeleton remote so you can get the template code (replace <USERNAME> with your GitHub username that created classroom repository).
+```bash
+git clone git@github.com:ucb-152/lab6-<USERNAME>.git
+cd lab6-<USERNAME>
+git remote add skeleton https://github.com/ucb-152/lab6
+git pull skeleton main
+```
+
+#### Run Setup Scripts
+Now, run the `install.sh` script.
+```bash
+source install.sh
+```
+The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), which contains all the dependencies needed for the assignment. It will also modify your `~/.bashrc` file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
+
+> [!IMPORTANT]
+> 
+> Now, shut down your instance before proceeding
+
+#### Local Setup
+We will also setup the repo on your local computer. If you have not already used GitHub on your local computer before, make sure to follow the same steps from above to configure your git name, email, and SSH access.
+
+Clone the GitHub repo to your local machine 
+```bash
+git clone git@github.com:ucb-152/lab6-<USERNAME>.git
+cd lab6-<USERNAME>
+git remote add skeleton https://github.com/ucb-152/lab6
+git pull skeleton main
+```
+
+This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub and pull them on the Tranium instance to simulate or benchmark them. While you are allowed to develop your kernels directly while connected to the Tranium instance, keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time. We recommend you do your initial development locally, then migrate to Tranium to simulate and benchmark the kernels. 
+
+> [!WARNING]
+>
+> Make sure to only make changes on your local or Tranium repository at a single time, otherwise you may run into merge conflicts.
 
 
 ## Directed Portion (30%)
@@ -111,37 +170,9 @@ The output layer contains the activations of the neurons that correspond to the 
 
 If you would like to learn more about feedforward neural networks, check out this article on [Feedforward Neural Networks](https://www.geeksforgeeks.org/feedforward-neural-network/). 
 
-### Step 0: Setup
+### Step 0: Files for NKI ffnn
 
-TODO: GitHub Classroom
-
-After you have created your project repo with GitHub Classroom, launch your Tranium instance and connect to it via SSH, a remote session using VSCode, or another application. 
-
-Once you have logged into the instance, clone the lab repo. 
-```bash
-git clone <TODO: Insert repo link here>
-cd lab6
-```
-
-Finally, run the `install.sh` script. 
-```bash
-source install.sh
-```
-The install script will activate the Python virtual environment prebuilt on the AWS instances with the Deep Learning AMI (`source /opt/aws_neuronx_venv_pytorch_2_5/bin/activate`), which contains all the dependencies needed for the assignment. It will also modify your ~/.bashrc file so that the virtual environment is activated automatically upon future logins to your machine. Finally, the script sets up your InfluxDB credentials so that you may use neuron-profile, which will be useful for future sections.
-
-> [!IMPORTANT]
-> 
-> Now, shut down your instance before proceeding
-
-Clone the GitHub repo to your local machine 
-```bash
-git clone <TODO: Insert repo link here>
-cd lab6
-```
-
-This will allow you to program and develop your kernels locally. Once you are ready to test them, you can push your changes to GitHub and pull them on the Tranium instance to simulate or benchmark them. While you are allowed to develop your kernels directly while connected to the Tranium instance, keep an eye on how long you are taking and make sure you are not burning through your credits. You have enough credits for roughly 40-50 hours of Tranium time.
-
-All files needed for the directed portion are located in `lab6/nki_ffnn`.
+All files needed for the directed portion are located in the `nki_ffnn` directory.
 - `utils.py`: Utility functions for loading the matrices and constants for the matrix dimensions
 - `ffnn_ref.py`: Reference NumPy implementation of the Feedforward Neural Network.
 - `ffnn.py`: Main program to develop the `ffnn` NKI kernels.
@@ -195,7 +226,7 @@ python tester.py --test-transpose
 
 If you are not passing the tests, make sure to read the documentation carefully for the limits and restrictions on various NKI APIs. 
 
-You may also wish to print your tensor values within the NKI kernel. While this is not possible when running the kernel on Tranium, the `tester.py` script uses the `nki.simulate_kernel` feature, which enables device printing with [nl.device_print](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html). Thus, you can put nl.device_print statements in your kernel if you are testing via the `tester.py` script.
+You may also wish to print your intermediate tensor values within the NKI kernel. While this is not possible when running the kernel on Tranium, the `tester.py` script uses the `nki.simulate_kernel` feature, which enables device printing with [nl.device_print](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html). Thus, you can put nl.device_print statements in your kernel if you are testing via the `tester.py` script.
 
 
 ### Step 4: Program the nki_bias_add_act kernel
@@ -253,9 +284,7 @@ python ffnn.py --benchmark
 - Compare the latencies of the various matmul kernels. Note any trends or outliers, and take a look at the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) to try and understand the changes in latency.
 
 ### Step 9: Submission
-Once you have successfully completed the steps above, you are finished with the directed portion! 
-
-TODO: Add Gradescope submission instructions
+Once you have successfully completed the steps above, you are finished with the directed portion! Go to the Directed assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. 
 
 
 ## Open-Ended Portion (70%)
@@ -310,7 +339,7 @@ The expected output is:
 
 Note the addition of the `batch_size`, which is the number of input data elements we are processing in a single batch (e.g doing conv2d on multiple images with the same set of filters). The weight tensor `W` contains an `out_channels` number of multi-channel filters, thus, the expected `out_tensor` has a feature map(`output_height`, `output_width`) for each filter. The `out_tensor` contains this set of feature maps for all of the images in the original batch input.
 
-### Step 0: Files for `conv2d_nki`
+### Step 0: Files for NKI conv2d
 All of the files needed for this part are located in `lab6/nki_conv2d`.
 
 - `conv2d_ref.py`: Reference PyTorch and NumPy implementations of the 2D Convolution kernel.
@@ -382,9 +411,12 @@ Once you have confirmed functional accuracy, run the full tester to benchmark th
 ```bash
 python tester.py
 ```
-If the script says you have met the performance requirements, you are done! You may submit your kernel for full credit. The competition winners will be decided based on the best performance, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further.
+If the script says you have met the performance requirements, you are done! You may submit your kernel for full credit. The competition winners will be decided based on the best performance, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further. 
+
+The script will also output the performance results to _____, which will be used to track the leaderboard. Do not modify this file before submitting -- **any attempts to tamper with results will be considered an act of academic dishonesty and impact your grade for the course**. We will benchmark the submitted kernels daily in the backend to verify that performance matches the submitted results.
 
 TODO: Upgrade tester for a more thorough fleet of input parameters and test cases.
+TODO: Upgrade tester for performance outputs
 
 #### Debugging and Optimizing Tips using Neuron Profile
 If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements in your performance by simply ensuring your kernel maps properly to the hardware parameters and architecture details.
@@ -398,14 +430,15 @@ Nevertheless, there is also a way to get more detailed performance metrics of th
 </p>
 
 ### Step 3: Submission
-Once you have successfully completed the steps above, you are finished with the open-ended portion! 
+Once you have successfully completed the steps above, you are finished with the Open-Ended portion! Go to the Open-Ended assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. 
 
-TODO: Add Gradescope submission instructions
-TODO: Add competition leaderboard details
+Your submission will automatically be added to the leaderboard, and once the competition is closed, the winners will have their kernels rerun extensively to confirm the submitted performance numbers.
 
+## Feedback Form
+As the final step for this Lab, please fill out this [Lab Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSdMDX6pdLr19Jmt5v1oP8FOTj4GVqGNUjp8Iu4oV7ydT4ZGCg/viewform?usp=header). There will also be space for you to mention any feedback for the previous labs, which we especially encourage for Lab 4 and 5 since there was not a dedicated feedback question for those assignments.
 
 ## Conclusion
-In this lab, you explored the architecture and programming of ML accelerators, specifically the AWS Tranium device. You learned about the key components of ML accelerators, such as systolic arrays, memory hierarchies, and specialized compute engines, and how these components are optimized for machine learning workloads. By implementing kernels using the Neuron Kernel Interface (NKI), you gained hands-on experience in mapping ML algorithms to a target hardware, customizing the iteration, computations, memory management, and more to achieve high performance. By completing this lab, you have gained valuable skills in programming domain-specific accelerators, a critical area in modern computing. These skills will be increasingly relevant as the demand for efficient AI and ML solutions continues to grow.
+Congrats on finishing Lab 6! In this lab, you explored the architecture and programming of ML accelerators, specifically the AWS Tranium device. You learned about the key components of ML accelerators, such as systolic arrays, memory hierarchies, and specialized compute engines, and how these components are optimized for machine learning workloads. By implementing kernels using the Neuron Kernel Interface (NKI), you gained hands-on experience in mapping ML algorithms to a target hardware, customizing the iteration, computations, memory management, and more to achieve high performance. By completing this lab, you have gained valuable skills in programming domain-specific accelerators, a critical area in modern computing. These skills will be increasingly relevant as the demand for efficient AI and ML solutions continues to grow.
 
 ## Acknowledgements
 The original material for this lab was designed by Ronit Nagarapu in Spring 2025. The Tranium portion of the lab was developed with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments.
