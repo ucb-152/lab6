@@ -281,6 +281,7 @@ python ffnn.py --benchmark
 ```
 - Compare the latency of the "tiled" matmul vs the reference numpy implementation. How much faster is the NKI implementation?
 - Compare the latencies of the various matmul kernels. Note any trends or outliers, and take a look at the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) to try and understand the changes in latency.
+- Note that the latencies may not be strictly decreasing with additional matmul optimizations, depending on how you implemented your other kernels. 
 
 ### Step 9: Submission
 Once you have successfully completed the steps above, you are finished with the directed portion! Go to the Directed assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. 
