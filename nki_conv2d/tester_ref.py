@@ -12,7 +12,7 @@ def test_conv2d_ref_kernels(ref_kernel, kernels, benchmark=False):
     output_channels_list = [256]
     filter_size_list = [3]
     batch_size_list = [4]
-    image_dims_list = [(32, 16)]
+    image_dims_list = [(16, 16)]
     dtypes = [np.float32, np.float16]
 
     # Tolerance for floating point comparisons (rtol, atol)
@@ -34,8 +34,15 @@ def test_conv2d_ref_kernels(ref_kernel, kernels, benchmark=False):
                             bias = np.random.rand(output_channels).astype(dtype)
                             args = [X, W, bias]
 
+                            # Print the test parameters
+                            print(
+                            f"Input Channels: {input_channels}, Output Channels: {output_channels}, Filter Size: {filter_size}, " \
+                            f"Batch Size: {batch_size}, Image Dimensions: {image_dims}, Data Type: {X.dtype.name}"
+                            )
+
                             # Get the reference result
                             ref_results = ref_kernel(*args)
+
 
                             # Run the target kernels, benchmarking if enabled
                             results = []
@@ -47,14 +54,11 @@ def test_conv2d_ref_kernels(ref_kernel, kernels, benchmark=False):
                                         result = kernel(*args)
                                     end_time = time.time()
                                     avg_time = (end_time - start_time) / num_iterations
-                                    print(
-                                        f"Kernel {kernel.__name__} average execution time: {avg_time*1e3:.3f} ms\n"
-                                        f"- Input Channels: {input_channels}, Output Channels: {output_channels}, Filter Size: {filter_size}, " \
-                                        f"Batch Size: {batch_size}, Image Dimensions: {image_dims}, Data Type: {dtype}"
-                                        )
+                                    print(f"- Kernel {kernel.__name__} average execution time: {avg_time*1e3:.3f} ms")
                                     results.append(result)
                             else:
                                 for kernel in kernels:
+                                    print(f"- Running kernel {kernel.__name__}...")
                                     result = kernel(*args)
                                     results.append(result)
 
@@ -64,9 +68,7 @@ def test_conv2d_ref_kernels(ref_kernel, kernels, benchmark=False):
                             for i, test_result in enumerate(results):
                                 if not np.allclose(ref_results, test_result, rtol=rtol, atol=atol):
                                     print(
-                                        f"Output mismatch detected between kernel {ref_kernel.__name__} and kernel {kernels[i].__name__}:\n"
-                                        f"- Input Channels: {input_channels}, Output Channels: {output_channels}, Kernel Size: {kernel_size}, " \
-                                        f"Batch Size: {batch_size}, Image Dimensions: {image_dims}, Data Type: {dtype}"
+                                        f"- Output mismatch detected between ref kernel {ref_kernel.__name__} and kernel {kernels[i].__name__}:"
                                     )
                                     
                                     # Create output directory if it doesn't exist
@@ -111,9 +113,7 @@ if __name__ == "__main__":
     ref_kernel = conv2d_torch
 
     # Kernels to verify against ref_kernel
-    # When --benchmark is set, each kernel below will be benchmarked
     kernels = [
-        conv2d_torch,
         conv2d_numpy,
         conv2d_numpy_matmul,
         conv2d_numpy_matmul_tiled

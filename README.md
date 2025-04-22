@@ -357,13 +357,10 @@ Both `conv2d_torch` and `conv2d_numpy` are functionally correct models. The PyTo
 
 The `conv2d_numpy_matmul` and `conv2d_numpy_matmul_tiled` are simply meant to serve as an example of how to translate the `conv2d` operations into matrix multiplications, but this is only one potential mapping. Feel free to reshape, tile, and operate on the data however you want, as long as you match the output of the reference model.
 
-To run the reference kernels and benchmark their performance, run the following command.
+To run the reference kernels and verify correctness, run the following command.
 ```bash
-python tester_ref.py --benchmark
+python tester_ref.py
 ```
-This should output the execution times for each of the kernels, as well as the input parameters like batch size, channel count, image & filter dimensions, and data type.
-
-Note that the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization.
 
 ### Step 1: Brainstorm your implementation
 Before jumping directly into programming your kernel, take some time to brainstorm your implementation (reshaping, tiling, loading/storing, operations, etc). Optimizing a kernel for a powerful custom accelerator is not a simple task! The amount of time you spend researching and preparing before development will considerably improve your experience. You will mitigate the number of issues you will have to debug and potentially improve the end performance of your kernel by thinking about the optimizations in advance. 
@@ -394,9 +391,16 @@ Run the following command to simulate your kernel and confirm your implementatio
 python tester_ref.py 
 ```
 
-> [!NOTE]
+You can also benchmark the kernels to get their average execution time.
+```bash
+python tester_ref.py --benchmark
+```
+
+> [!WARNING]
 >
-> Remember, the speed of your kernel on NumPy may give some insights on relative performance gain, but ultimately, they won't be accurate to the execution on Tranium with NKI. You should use NumPy brainstorming simply to ensure functional accuracy, and then immediately move to NKI for performance testing and benchmarking. Thus, there is no need to add the `--benchmark` flag to the above command. 
+> Use the `--benchmark` flag at your own risk. NumPy and CPUs do not have the same optimizations that Tranium will (e.g. built-in hardware for tiling, reshaping, various dtypes, etc). For example, the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization. The float16 tests will also be significantly slower than float32 on NumPy, but on Tranium it will be much faster.
+> 
+> The speed of your kernel on NumPy may give some insights on relative performance gain, but ultimately, they won't be accurate to the execution on Tranium with NKI. You should use NumPy brainstorming simply to ensure functional accuracy, and then immediately move to NKI for accurate performance testing and benchmarking. 
 
 
 ### Step 2: Program and optimize conv2d

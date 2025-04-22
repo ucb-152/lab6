@@ -41,10 +41,8 @@ Note:
     the underlying calculations, memory accesses, and looping structure of the convolution operation.
 """
 def conv2d_numpy(X, W, bias):
-    out = None
-    
     batch_size, in_channels, input_height, input_width = X.shape
-    out_channels, _, filter_height, filter_width = W.shape
+    out_channels, in_channels_, filter_height, filter_width = W.shape
 
     H_out = 1 + (input_height - filter_height)
     W_out = 1 + (input_width - filter_width)
