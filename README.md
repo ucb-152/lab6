@@ -78,7 +78,7 @@ There are a lot of factors at play when writing kernels on Tranium devices, and 
 
 
 ## Setup
-Follow the steps below to setup the Tranium instance you will be using for the lab.
+Follow the steps below to set up the Tranium instance you will be using for the lab.
 
 ### Launch and Configure Tranium Instance
 To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETUP.md)
@@ -112,7 +112,7 @@ If you have configured things correctly, you should see something like this:
 Hi <YOUR GITHUB USERNAME>! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-Finally, clone the repository your created eariler on GitHub Classroom, and add this repo as a skeleton remote so you can get the template code (replace <USERNAME> with your GitHub username that created classroom repository).
+Finally, clone the repository you created earlier on GitHub Classroom and add this repo as a skeleton remote so you can get the template code (replace <USERNAME> with your GitHub username that created the classroom repository).
 ```bash
 git clone git@github.com:ucb-152/lab6-<USERNAME>.git
 cd lab6-<USERNAME>
@@ -132,7 +132,7 @@ The install script will activate the Python virtual environment prebuilt on the 
 > Now, shut down your instance before proceeding
 
 #### Local Setup
-We will also setup the repo on your local computer. If you have not already used GitHub on your local computer before, make sure to follow the same steps from above to configure your git name, email, and SSH access.
+We will also set up the repo on your local computer. If you have not already used GitHub on your local computer before, make sure to follow the same steps from above to configure your git name, email, and SSH access.
 
 Clone the GitHub repo to your local machine 
 ```bash
@@ -150,7 +150,7 @@ This will allow you to program and develop your kernels locally. Once you are re
 
 
 ## Directed Portion (30%)
-For the Directed portion, you are tasked with developing an `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familiarize yourself with the Tranium and NeuronCore architecture, and learn how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
+For the Directed portion, you are tasked with developing an `ffnn` (Feedforward Neural Network) kernel on Tranium. The goal of this task is to familiarize yourself with the Tranium and NeuronCore architecture and learn how to program them using AWS's Neuron Kernel Interface or NKI, which you will learn more about soon.
 
 ### Overview of Feedforward Neural Networks
 
@@ -160,7 +160,7 @@ For the Directed portion, you are tasked with developing an `ffnn` (Feedforward 
   <a href="https://www.geeksforgeeks.org/feedforward-neural-network/">Source</a>
 </p>
 
-A feedforward neural network is a type of neural network where the information flows through the layers in one direction. We start with the input layer, which recieves the initial data, with each neuron acting as a feature of the input data. 
+A feedforward neural network is a type of neural network where the information flows through the layers in one direction. We start with the input layer, which receives the initial data, with each neuron acting as a feature of the input data. 
 
 Then, we pass through multiple hidden layers, and each neuron applies a weighted sum of its inputs, often with an added bias, followed by an activation function. This calculation is often expressed as a matrix multiplication. The input matrix `X` has dimensions `(N, d)`, where `N` is the number of samples (often referred to as the batch size), and `d` is the number of input features. Each connection between layers can be represented by a weight matrix `W` and a bias vector `b`. The `W` matrix has dimensions `(d, h)`, where `h` is the number of neurons in the hidden layer. The bias vector `b` has a length of `h`. 
 
@@ -279,7 +279,6 @@ Run the following command to benchmark the `nki_predict` kernel, using the diffe
 ```bash
 python ffnn.py --benchmark
 ```
-
 - Compare the latency of the "tiled" matmul vs the reference numpy implementation. How much faster is the NKI implementation?
 - Compare the latencies of the various matmul kernels. Note any trends or outliers, and take a look at the [AWS Matrix Multiplication tutorial](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/tutorials/matrix_multiplication.html#matrix-multiplication) to try and understand the changes in latency.
 
