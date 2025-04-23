@@ -22,7 +22,7 @@ Finally, after completing the lab, you will need to fill out a feedback form. Fa
 Graded Items:
 - Code for Directed Portion: `nki_ffnn/kernels.py`
 - Code for Open-Ended Portion: `nki_conv2d/conv2d.py`
-- Submission to feedback form
+- Submission to the feedback form
 
 ## Background:
 ### ML Accelerator Hardware
@@ -425,7 +425,7 @@ python tester.py --simulate --test-case in256_out256_filter3x3_batch4_32x32_floa
 python tester.py --simulate --test-case in256_out256_filter3x3_batch4_32x32_float32
 ```
 
-Once you have confirmed functional accuracy, benchmark the basic tests to check the kernels performance. 
+Once you have confirmed functional accuracy, benchmark the basic tests to check the kernel's performance. 
 ```bash
 python tester.py --basic
 ```
@@ -440,7 +440,7 @@ Finally, run the full fleet of tests with the following command. Add the `--reco
 python tester.py --record
 ```
 
-If the script says you have met the minimum performance requirements on the full fleet of tests, you are done! Make sure to add the results file to your GitHub repository before submitting to Gradescope.
+If the script says you have met the minimum performance requirements on the full fleet of tests, you are done! Make sure to add the file to your GitHub repository before submitting to Gradescope.
 ```bash
 git add results/execution_times.json
 ```
@@ -467,12 +467,6 @@ Nevertheless, there is also a way to get more detailed performance metrics of th
 </p>
 
 You can generate the profile data on the kernels by adding the `--profile` flag to the `tester.py` commands. Note, you can't profile the kernels with `--simulate` active.
-```bash
-python tester.py --basic --profile
-```
-```bash
-python tester.py --profile
-```
 
 Read the instructions in [NEURON_PROFILE.md](/NEURON_PROFILE.md) for more information on viewing and interpreting the profile data.
 
