@@ -95,7 +95,7 @@ To begin working on Tranium, follow the instructions in [AWS_SETUP.md](/AWS_SETU
 ### Setup Repository and Environment
 
 #### Setup GitHub Classroom Repository
-To begin, accept the GitHub Classroom invite sent to your @berkeley.edu email. This will create a personal repo for you to push your code and track your work. After you have created your project repo with GitHub Classroom, launch your Tranium instance and connect to it via SSH, a remote session using VSCode, or another application. 
+To begin, accept the GitHub Classroom invite link. This will create a personal repo for you to push your code and track your work. After you have created your project repo with GitHub Classroom, launch your Tranium instance and connect to it via SSH, a remote session using VSCode, or another application. 
 
 Once you have logged into the instance, make sure you have GitHub configured.
 
