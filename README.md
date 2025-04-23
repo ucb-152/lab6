@@ -17,7 +17,12 @@ All graded items are to be submitted through [Gradescope](https://www.gradescope
 
 The Directed and Open-Ended portion are both due **Friday, May 2 at 11:59PM**. You may continue to optimize your Open-Ended kernels for the competition until **Friday, May 9 at 11:59PM**, after which the competition will be closed and the prizes awarded. 
 
-Finally, after completing the lab, you will need to fill out a feedback form. This helps us improve this lab and previous labs for future versions of the course. Any feedback, positive or negative, is greatly appreciated!
+Finally, after completing the lab, you will need to fill out a feedback form. Failure to fill out the form will result in a penalty to your lab grade. The form helps us improve this lab for future versions of the course, so any feedback, positive or negative, is greatly appreciated!
+
+Graded Items:
+- Code for Directed Portion: `nki_ffnn/kernels.py`
+- Code for Open-Ended Portion: `nki_conv2d/conv2d.py`
+- Submission to feedback form
 
 ## Background:
 ### ML Accelerator Hardware
@@ -294,8 +299,8 @@ For the Open-Ended portion, you are tasked with developing a `conv2d` on Tranium
 The prizes for the best performing `conv2d` kernels are as follows:
 - 1st Place: $200 Amazon gift card
 - 2nd-5th Place: $100 Amazon gift card
-- 6th-nth Place: An Amazon Echo Show
-TODO: replace n 
+- 6th-nth Place: An Amazon Echo Show (`n` is TBD)
+
 
 Now that you are excited to win some prizes, let's get into the task!
 
@@ -346,6 +351,7 @@ All of the files needed for this part are located in `lab6/nki_conv2d`.
 - `conv2d.py`: Main program to develop the `conv2d` NKI kernels.
 - `tester_ref.py`: Test and benchmark reference kernel implementations.
 - `tester.py`: Test and benchmark NKI kernel implementation.
+- `utils.py`: Utility functions for running tests
 
 To start, take a look at `conv2d_ref.py` for the PyTorch and NumPy implementations for the 2D Convolution kernels:
 - `conv2d_torch`: Built-in PyTorch implementation for [2D Convolution](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html). **Used as the golden model.**
@@ -375,14 +381,14 @@ When mapping an algorithm or computation to a target hardware, here are some fac
 #### Brainstorm using NKI Simulate
 Once you have an idea of how you want to implement your kernel, you can program it in the `conv2d_nki` function in `conv2d.py`. Then, you can quickly test the kernel for functional accuracy using `nki.simulate_kernel`.
 
-Run the following command to simulate your kernel and confirm your implementation works functionally:
+Run the following command to simulate your kernel and confirm your implementation works functionally on basic tests:
 ```bash
-python tester.py --simulate
+python tester.py --simulate --basic
 ```
-Once you know your kernel works functionally, you can move on to the next step to benchmark your kernel to test its speed and performance.
+Once you know your kernel works functionally, you can move on to the [next step](#step-2-program-and-optimize-conv2d) to benchmark your kernel to test its speed and performance.
 
 #### Brainstorm using NumPy
-If you want to brainstorm your implementation on your local computer, you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. Feel free to comment out the other kernels on line 115 of `ref_tester.py` to only benchmark the kernels you are modifying or developing. 
+If you want to brainstorm your implementation on your local computer, you can first create a reference implementation on NumPy by adding a function to `conv2d_ref.py` and the list of kernels in `ref_tester.py`. Feel free to modify the `test_kernels` list in `ref_tester.py` to only benchmark the kernels you are modifying or developing. 
 
 By brainstorming on NumPy, you can quickly confirm that your approach is functionally correct (i.e. correct outputs), before using up your credits and time on the Tranium instance. However, we recommend you spend most of your time developing directly on NKI to make sure your mapping is actually compatible/achievable with the NKI APIs and NeuronCore.
 
@@ -406,26 +412,53 @@ python tester_ref.py --benchmark
 ### Step 2: Program and optimize conv2d
 Develop and optimize the `conv2d_nki` kernel in `conv2d.py`.
 
-Run the following command to simulate your kernel and confirm your implementation works functionally:
+Run the following command to simulate your kernel and confirm your implementation works functionally on basic tests:
 ```bash
-python tester.py --simulate
+python tester.py --simulate --basic
 ```
 
-Once you have confirmed functional accuracy, run the full tester to benchmark the kernel and check its performance.
+Once you have confirmed functional accuracy, simulate various test cases to ensure your implementation is robust to multiple input parameters.
 ```bash
-python tester.py
+python tester.py --simulate --test-case in128_out256_filter3x3_batch4_32x32_float16
+python tester.py --simulate --test-case in128_out256_filter5x5_batch16_256x256_float32
+python tester.py --simulate --test-case in256_out256_filter3x3_batch4_32x32_float16
+python tester.py --simulate --test-case in256_out256_filter3x3_batch4_32x32_float32
 ```
-If the script says you have met the performance requirements, you are done! You may submit your kernel for full credit. The competition winners will be decided based on the best performance, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further. 
 
-The script will also output the performance results to _____, which will be used to track the leaderboard. Do not modify this file before submitting -- **any attempts to tamper with results will be considered an act of academic dishonesty and impact your grade for the course**. We will benchmark the submitted kernels daily in the backend to verify that performance matches the submitted results.
+Once you have confirmed functional accuracy, benchmark the basic tests to check the kernels performance. 
+```bash
+python tester.py --basic
+```
 
-TODO: Upgrade tester for a more thorough fleet of input parameters and test cases.
-TODO: Upgrade tester for performance outputs
+You can also benchmark specific test cases with the following command.
+```bash
+python tester.py --test-case in128_out256_filter3x3_batch4_32x32_float32
+```
+
+Finally, run the full fleet of tests with the following command. Add the `--record` flag to record your performance results. Note that running the full fleet of kernels may take a few minutes.
+```bash
+python tester.py --record
+```
+
+If the script says you have met the minimum performance requirements on the full fleet of tests, you are done! Make sure to add the results file to your GitHub repository before submitting to Gradescope.
+```bash
+git add results/execution_times.json
+```
+
+If you have met the performance goals for all of the kernels, you may submit your kernel for full credit. See the [Submission Step](#step-3-submission) for more details. 
+
+> [!IMPORTANT]
+>
+> The competition winners will be decided based on the best performance on the full fleet of tests, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further. 
+
+> [!WARNING]
+>
+> The script will also output the performance results to `results/execution_times.json`, which will be used to track the leaderboard during the initial weeks of the competition. Do not modify this file before submitting -- **any attempt to tamper with results will be considered an act of academic dishonesty and impact your grade for the course**. We will rerun submissions in the final weeks of the competition to verify that your submission met the performance requirements, and we will also update the leaderboard accordingly.
 
 #### Debugging and Optimizing Tips using Neuron Profile
 If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements in your performance by simply ensuring your kernel maps properly to the hardware parameters and architecture details.
 
-Nevertheless, there is also a way to get more detailed performance metrics of the execution of your kernel, using AWS's Neuron Profile. Read the [Neuron Profile User Guide](/NEURON_PROFILE.md) for more information.
+Nevertheless, there is also a way to get more detailed performance metrics of the execution of your kernel, using AWS's Neuron Profile. 
 
 <p align="center">
   <img width="600" src="./img/neuron_profile_timeline.png">
@@ -433,10 +466,18 @@ Nevertheless, there is also a way to get more detailed performance metrics of th
   <a href="https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-profile-user-guide.html">Source</a>
 </p>
 
-### Step 3: Submission
-Once you have successfully completed the steps above, you are finished with the Open-Ended portion! Go to the Open-Ended assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. 
+You can generate the profile data on the kernels by adding the `--profile` flag to the `tester.py` commands. Note, you can't profile the kernels with `--simulate` active.
+```bash
+python tester.py --basic --profile
+```
+```bash
+python tester.py --profile
+```
 
-Your submission will automatically be added to the leaderboard, and once the competition is closed, the winners will have their kernels rerun extensively to confirm the submitted performance numbers.
+Read the instructions in [NEURON_PROFILE.md](/NEURON_PROFILE.md) for more information on viewing and interpreting the profile data.
+
+### Step 3: Submission
+Once you have successfully completed the steps above, you are finished with the Open-Ended portion! Make sure your changes have been pushed to your repository, then go to the Open-Ended assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. Your submission will automatically be added to the leaderboard.
 
 ## Feedback Form
 As the final step for this Lab, please fill out this [Lab Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSdMDX6pdLr19Jmt5v1oP8FOTj4GVqGNUjp8Iu4oV7ydT4ZGCg/viewform?usp=header). There will also be space for you to mention any feedback for the previous labs, which we especially encourage for Lab 4 and 5 since there was not a dedicated feedback question for those assignments.
