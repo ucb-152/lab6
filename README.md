@@ -15,7 +15,7 @@ There are two sections of the lab, the Directed and Open-Ended Portions. The Dir
 ### Graded Items:
 All graded items are to be submitted through [Gradescope](https://www.gradescope.com/courses/959486). The Directed and Open-Ended portions of the lab must both be completed individually, unless otherwise approved by course staff. The Directed portion is worth 30% of your lab grade, and the Open-Ended portion is worth 70% of your lab grade. 
 
-The Directed and Open-Ended portion are both due **Friday, May 2 at 11:59PM**. You may continue to optimize your Open-Ended kernels for the competition until **Friday, May 9 at 11:59PM**, after which the competition will be closed and the prizes awarded. 
+The Directed Portion is due **Friday, May 2 at 11:59PM**. The Open-Ended portion is due **Friday, May 9 at 11:59PM**, after which the competition will be closed and the prizes awarded. 
 
 Finally, after completing the lab, you will need to fill out a feedback form. Failure to fill out the form will result in a penalty to your lab grade. The form helps us improve this lab for future versions of the course, so any feedback, positive or negative, is greatly appreciated!
 
@@ -406,7 +406,7 @@ python tester_ref.py --benchmark
 
 > [!WARNING]
 >
-> Use the `--benchmark` flag at your own risk. NumPy and CPUs do not have the same optimizations that Tranium will (e.g. built-in hardware for tiling, reshaping, various dtypes, etc). For example, the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization. The float16 tests will also be significantly slower than float32 on NumPy, but on Tranium it will be much faster.
+> Use the `--benchmark` flag at your own risk. NumPy and CPUs do not have the same optimizations that Tranium will (e.g. built-in hardware for tiling, reshaping, various dtypes, etc). For example, the tiled matmul version may be slightly slower than the plain matmul version (due to the reshaping, looping, etc), but it will be faster (and required) on architectures like Tranium that are meant for tiling and parallelization. Tests using float16 will also be significantly slower than float32 on NumPy, but on Tranium it will be much faster.
 > 
 > The speed of your kernel on NumPy may give some insights on relative performance gain, but ultimately, they won't be accurate to the execution on Tranium with NKI. You should use NumPy brainstorming simply to ensure functional accuracy, and then immediately move to NKI for accurate performance testing and benchmarking. 
 
@@ -419,9 +419,9 @@ Run the following command to simulate your kernel and confirm your implementatio
 python tester.py --simulate --basic
 ```
 
-Once you have confirmed functional accuracy, simulate various test cases to ensure your implementation is robust to multiple input parameters. You can simulate specific test cases with the following command.
+Once you have confirmed functional accuracy, simulate various test cases to ensure your implementation is robust to multiple input parameters. You can simulate specific test cases with the following command. View `utils.py` for the test case options.
 ```bash
-python tester.py --simulate --test-case in128_out128_filter3x3_batch16_256x256_float16
+python tester.py --simulate --test-case in128_out256_filter5x5_batch16_32x32_float16
 ```
 
 Once you have confirmed functional accuracy, benchmark the basic tests to check the kernel's performance. 
@@ -431,7 +431,7 @@ python tester.py --basic
 
 You can also benchmark specific test cases with the following command.
 ```bash
-python tester.py --test-case in128_out128_filter3x3_batch16_256x256_float16
+python tester.py --test-case in128_out256_filter5x5_batch16_32x32_float16
 ```
 
 Finally, run the full fleet of tests with the following command. Add the `--record` flag to record your performance results. Note that running the full fleet of kernels may take a few minutes.
@@ -439,7 +439,7 @@ Finally, run the full fleet of tests with the following command. Add the `--reco
 python tester.py --record
 ```
 
-If the script says you have met the minimum performance requirements on the full fleet of tests, you are done! Make sure to add the file to your GitHub repository before submitting to Gradescope.
+If the script does not error, you have met the minimum performance requirements on the full fleet of tests! Make sure to add the file to your GitHub repository before submitting to Gradescope.
 ```bash
 git add results/execution_times.json
 ```
