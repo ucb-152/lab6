@@ -215,6 +215,8 @@ In order to program the Tranium devices easily, we will take advantage of AWS's 
 
 An important detail is that NKI operations often have dimension restrictions due to the physical limits of the hardware. Thus, we must "tile" our operations when dealing with larger matrices. Tiling is quite common in ML workloads and kernels, as the inputs are very, very large. Make sure you have read the APIs carefully for the dimension restrictions, and tile your kernels accordingly. 
 
+You may notice throughout the lab that the reported execution time of NKI kernels may not match the real time it takes when running the python script from terminal. This is because NKI must compile the python NKI kernel into the code (i.e. .neff file) that is actually run on the Tranium instance. This may take seconds to minutes to compile, but this overhead cost is usually acceptable for real ML workloads that run for months. The reported time using `nki.benchmark` is the actual time Tranium takes to run the kernel and is what we will use to measure performance.
+
 
 ### Step 3: Program the nki_transpose kernel
 In this part, we will develop the transpose kernel, which will allow us to use the matmul kernels that expect a transposed input. As mentioned in the guides, there are three main stages to programming a NKI kernel: 1) Load inputs, 2) Perform computation, and 3) Store outputs. For `nki_tranpose`, we are not really performing any computation, but we can consider "transposing" as the desired modification to the input data. 
