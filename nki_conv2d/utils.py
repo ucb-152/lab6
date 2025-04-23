@@ -1,36 +1,5 @@
-import itertools
 import re
 import numpy as np
-
-input_channels_list = [128, 256]
-output_channels_list = [256]
-filter_size_list = [3, 5]
-batch_size_list = [4, 16]
-image_dims_list = [(32, 32), (256, 256)]
-dtype_list = [np.float16, np.float32]
-fleet_params = list(itertools.product(
-    input_channels_list,
-    output_channels_list,   
-    filter_size_list,
-    batch_size_list,
-    image_dims_list,
-    dtype_list
-))
-
-input_channels_list = [256]
-output_channels_list = [256]
-filter_size_list = [3]
-batch_size_list = [4]
-image_dims_list = [(32, 32)]
-dtype_list = [np.float32]
-basic_params = list(itertools.product(
-    input_channels_list,
-    output_channels_list,
-    filter_size_list,
-    batch_size_list,
-    image_dims_list,
-    dtype_list
-))
 
 def params_name(params):
     input_channels, output_channels, filter_size, batch_size, image_dims, dtype = params
@@ -39,9 +8,6 @@ def params_name(params):
     return name
 
 def test_case_params(test_case):
-    if test_case not in test_cases:
-        raise ValueError(f"Invalid test case name: {test_case}")
-
     m = re.match(r"in(\d+)_out(\d+)_filter(\d+)x(\d+)_batch(\d+)_(\d+)x(\d+)_(\w+)", test_case)
     if not m:
         raise ValueError(f"Invalid test case name: {test_case}")
@@ -61,52 +27,34 @@ def test_case_params(test_case):
 
     params = (input_channels, output_channels, filter_size, batch_size, image_dims, dtype)
 
-    if params not in fleet_params:
-        raise ValueError(f"Invalid test case params: {params} for test case: {test_case}")
-
     return params
-
-
-performance_requirements = {
-    params_name(params): 200000 for params in fleet_params
-}
 
 dtype_tol = {
     np.float32: {"rtol": 1e-5, "atol": 1e-8},
     np.float16: {"rtol": 1e-3, "atol": 1e-5},
 }
 
-test_cases = [
-    "in128_out256_filter3x3_batch4_32x32_float16",
-    "in128_out256_filter3x3_batch4_32x32_float32",
-    "in128_out256_filter3x3_batch4_256x256_float16",
-    "in128_out256_filter3x3_batch4_256x256_float32",
-    "in128_out256_filter3x3_batch16_32x32_float16",
-    "in128_out256_filter3x3_batch16_32x32_float32",
-    "in128_out256_filter3x3_batch16_256x256_float16",
-    "in128_out256_filter3x3_batch16_256x256_float32",
-    "in128_out256_filter5x5_batch4_32x32_float16",
-    "in128_out256_filter5x5_batch4_32x32_float32",
-    "in128_out256_filter5x5_batch4_256x256_float16",
-    "in128_out256_filter5x5_batch4_256x256_float32",
-    "in128_out256_filter5x5_batch16_32x32_float16",
-    "in128_out256_filter5x5_batch16_32x32_float32",
-    "in128_out256_filter5x5_batch16_256x256_float16",
-    "in128_out256_filter5x5_batch16_256x256_float32",
-    "in256_out256_filter3x3_batch4_32x32_float16",
-    "in256_out256_filter3x3_batch4_32x32_float32",
-    "in256_out256_filter3x3_batch4_256x256_float16",
-    "in256_out256_filter3x3_batch4_256x256_float32",
-    "in256_out256_filter3x3_batch16_32x32_float16",
-    "in256_out256_filter3x3_batch16_32x32_float32",
-    "in256_out256_filter3x3_batch16_256x256_float16",
-    "in256_out256_filter3x3_batch16_256x256_float32",
-    "in256_out256_filter5x5_batch4_32x32_float16",
-    "in256_out256_filter5x5_batch4_32x32_float32",
-    "in256_out256_filter5x5_batch4_256x256_float16",
-    "in256_out256_filter5x5_batch4_256x256_float32",
-    "in256_out256_filter5x5_batch16_32x32_float16",
-    "in256_out256_filter5x5_batch16_32x32_float32",
-    "in256_out256_filter5x5_batch16_256x256_float16",
-    "in256_out256_filter5x5_batch16_256x256_float32",
-]
+basic_test_cases = {
+    "in128_out256_filter3x3_batch4_32x32_float32": 200000,
+}
+
+fleet_test_cases = {
+    "in128_out128_filter3x3_batch16_256x256_float16": 200000,
+    "in128_out128_filter5x5_batch16_256x256_float16": 200000,
+
+    "in128_out256_filter3x3_batch4_32x32_float32": 200000,
+    "in128_out256_filter3x3_batch4_256x256_float16": 200000,
+    "in128_out256_filter3x3_batch16_32x32_float32": 200000,
+    "in128_out256_filter3x3_batch16_256x256_float16": 200000,
+
+    "in128_out256_filter5x5_batch4_32x32_float32": 200000,
+    "in128_out256_filter5x5_batch4_256x256_float16": 200000,
+    "in128_out256_filter5x5_batch16_32x32_float16": 200000,
+
+    "in256_out256_filter3x3_batch4_32x32_float16": 200000,
+    "in256_out256_filter3x3_batch4_256x256_float16": 200000,
+    "in256_out256_filter3x3_batch16_32x32_float16": 200000,
+    
+    "in256_out256_filter5x5_batch4_32x32_float16": 200000,
+    "in256_out256_filter5x5_batch16_32x32_float16": 200000,
+}

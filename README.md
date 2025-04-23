@@ -419,12 +419,9 @@ Run the following command to simulate your kernel and confirm your implementatio
 python tester.py --simulate --basic
 ```
 
-Once you have confirmed functional accuracy, simulate various test cases to ensure your implementation is robust to multiple input parameters.
+Once you have confirmed functional accuracy, simulate various test cases to ensure your implementation is robust to multiple input parameters. You can simulate specific test cases with the following command.
 ```bash
-python tester.py --simulate --test-case in128_out256_filter3x3_batch4_32x32_float16
-python tester.py --simulate --test-case in128_out256_filter5x5_batch16_256x256_float32
-python tester.py --simulate --test-case in256_out256_filter3x3_batch4_32x32_float16
-python tester.py --simulate --test-case in256_out256_filter3x3_batch4_32x32_float32
+python tester.py --simulate --test-case in128_out128_filter3x3_batch16_256x256_float16
 ```
 
 Once you have confirmed functional accuracy, benchmark the basic tests to check the kernel's performance. 
@@ -434,7 +431,7 @@ python tester.py --basic
 
 You can also benchmark specific test cases with the following command.
 ```bash
-python tester.py --test-case in128_out256_filter3x3_batch4_32x32_float32
+python tester.py --test-case in128_out128_filter3x3_batch16_256x256_float16
 ```
 
 Finally, run the full fleet of tests with the following command. Add the `--record` flag to record your performance results. Note that running the full fleet of kernels may take a few minutes.

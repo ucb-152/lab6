@@ -16,7 +16,7 @@ from neuronxcc.nki import benchmark
 
 from conv2d import conv2d_nki as conv2d
 from conv2d_ref import conv2d_torch
-from utils import performance_requirements, basic_params, fleet_params, dtype_tol, params_name, test_case_params
+from utils import dtype_tol, params_name, test_case_params, basic_test_cases, fleet_test_cases
 import json
 
 
@@ -24,17 +24,17 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
     ref_kernel = conv2d_torch
 
     if basic_fleet:
-        parameter_combinations = basic_params
+        test_cases = basic_test_cases
     elif full_fleet:
-        parameter_combinations = fleet_params
+        test_cases = fleet_test_cases
     elif test_case:
-        parameter_combinations = [test_case_params(test_case)]
+        test_cases = {test_case: fleet_test_cases[test_case]}
     else:
         raise ValueError("Please specify either basic_fleet, full_fleet, or test_case.")
 
-    for params in parameter_combinations:
+    for test_case in test_cases.keys():
+        params = test_case_params(test_case)
         input_channels, output_channels, filter_size, batch_size, image_dims, dtype = params
-        params_name_str = params_name(params)
 
         X = np.random.rand(batch_size, input_channels, image_dims[0], image_dims[1]).astype(dtype)
         W = np.random.rand(output_channels, input_channels, filter_size, filter_size).astype(dtype)
@@ -42,8 +42,8 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
 
         args = [X, W, bias]
 
-        print(f"Running correctness test {params_name_str} -- ", end="", flush=True)
-
+        print(f"Running correctness test {test_case} -- ", end="", flush=True)
+        
         test_result = kernel(*args)
         ref_results = ref_kernel(*args)
 
@@ -91,21 +91,20 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
     return True
 
 
-def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, test_case=None, profile=False, record=True):
+def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, test_case=None, profile=False, record=False):
     if basic_fleet:
-        parameter_combinations = basic_params
+        test_cases = basic_test_cases
     elif full_fleet:
-        parameter_combinations = fleet_params
+        test_cases = fleet_test_cases
     elif test_case:
-        parameter_combinations = [test_case_params(test_case)]
+        test_cases = {test_case: fleet_test_cases[test_case]}
     else:
         raise ValueError("Please specify either basic_fleet, full_fleet, or test_case.")
 
     execution_times = {}
-
-    for params in parameter_combinations:
+    for test_case in test_cases.keys():
+        params = test_case_params(test_case)
         input_channels, output_channels, filter_size, batch_size, image_dims, dtype = params
-        params_name_str = params_name(params)
 
         X = np.random.rand(batch_size, input_channels, image_dims[0], image_dims[1]).astype(dtype)
         W = np.random.rand(output_channels, input_channels, filter_size, filter_size).astype(dtype)
@@ -113,11 +112,11 @@ def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
 
         args = [X, W, bias]
 
-        print(f"Benchmarking {params_name_str} test...")
+        print(f"Benchmarking {test_case} test...")
 
         if profile:
             os.makedirs("profiles", exist_ok=True)
-            neff_file_name = params_name(params) + ".neff"
+            neff_file_name = test_case + ".neff"
             bench_func = nki.benchmark(
                 warmup=20, iters=100, save_neff_name=neff_file_name
             )(kernel)
@@ -130,15 +129,14 @@ def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
             bench_func(*args)
         
         exec_time = bench_func.benchmark_result.nc_latency.get_latency_percentile(99)
-        performance_requirement = performance_requirements[params_name_str]
+        performance_requirement = test_cases[test_case]
         if exec_time > performance_requirement:
-            print(
-                f"Performance requirement not met: need to be under {performance_requirement} μs "
-            )
+            print(f"Failed :( Executed in {exec_time} μs")
+            print(f"Performance requirement not met: need to be under {performance_requirement} μs ")
             return False
         else:
             print(f"Passed! Executed in {exec_time} μs\n")
-        execution_times[params_name_str] = exec_time
+        execution_times[test_case] = exec_time
 
     if record:
         output_dir = "results"
@@ -166,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--simulate",
         action="store_true",
-        help="Use nki.simulate_kernel to run kernel faster for correctness tests",
+        help="Use nki.simulate_kernel for correctness tests",
     )
     parser.add_argument(
         "--basic",
@@ -190,11 +188,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.profile and args.simulate:
         print("Warning: --profile and --simulate are mutually exclusive. --profile will be ignored.")
+    if args.record and args.simulate:
+        print("Warning: --record and --simulate are mutually exclusive. --record will be ignored.")
     if args.basic and args.test_case:
         print("Warning: --basic and --test-case are mutually exclusive. --basic will be ignored.")
-    if args.record:
-        if args.basic or args.test_case:
-            print("Warning: --record should not be used with --basic or --test-case.")
 
     np.random.seed(args.seed)
 
@@ -221,33 +218,33 @@ if __name__ == "__main__":
     # Performance tests
     if not args.simulate:
         if args.test_case:
-            test_result = test_performance_conv2d_kernel(conv2d, test_case=args.test_case, profile=args.profile)
+            test_result = test_performance_conv2d_kernel(conv2d, test_case=args.test_case, profile=args.profile, record=args.record)
             if test_result == False:
                 exit()
         else:
             print("Running basic performance tests for conv2d kernel...")
-            test_result = test_performance_conv2d_kernel(conv2d, basic_fleet=True, profile=args.profile)
+            test_result = test_performance_conv2d_kernel(conv2d, basic_fleet=True, profile=args.profile, record=args.record)
             if test_result == False:
                 exit()
 
             if not args.basic:
                 print("Running full fleet of performance tests for conv2d kernel...")
-                test_result = test_performance_conv2d_kernel(conv2d, full_fleet=True, profile=args.profile, record=True)
+                test_result = test_performance_conv2d_kernel(conv2d, full_fleet=True, profile=args.profile, record=args.record)
                 if test_result == False:
                     exit()
 
         if args.profile:
             print("Profiling conv2d kernels...")
             if args.test_case:
-                param_list = [test_case_params(args.test_case)]
+                test_cases = {args.test_case: fleet_test_cases[args.test_case]}
             elif args.basic:
-                param_list = basic_params 
+                test_cases = basic_test_cases
             else:
-                param_list = fleet_params
+                test_cases = fleet_test_cases
 
-            for params in param_list:
-                neff_file_name = params_name(params) + ".neff"
-                profile_file_name = params_name(params) + ".ntff"
+            for test_case in test_cases:
+                neff_file_name = test_case + ".neff"
+                profile_file_name = test_case + ".ntff"
                 print(f"Profiling {neff_file_name}... ", end="", flush=True)
 
                 subprocess.run(
