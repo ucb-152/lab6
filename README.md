@@ -291,7 +291,7 @@ python ffnn.py --benchmark
 - Note that the latencies may not be strictly decreasing with additional matmul optimizations, depending on how you implemented your other kernels. 
 
 ### Step 9: Submission
-Once you have successfully completed the steps above, you are finished with the directed portion! Go to the Directed assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. 
+Once you have successfully completed the steps above, you are finished with the directed portion! Make sure your changes have been pushed to your repository, then go to the Directed assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code.
 
 
 ## Open-Ended Portion (70%)
@@ -434,25 +434,25 @@ You can also benchmark specific test cases with the following command.
 python tester.py --test-case in128_out256_filter5x5_batch16_32x32_float16
 ```
 
-Finally, run the full fleet of tests with the following command. Add the `--record` flag to record your performance results. Note that running the full fleet of kernels may take a few minutes.
+Finally, run the full fleet of tests with the following command. Add the `--record` flag to record your performance results. Note that running the full fleet of tests may take a few minutes.
 ```bash
 python tester.py --record
 ```
 
 If the script does not error, you have met the minimum performance requirements on the full fleet of tests! Make sure to add the file to your GitHub repository before submitting to Gradescope.
 ```bash
-git add results/execution_times.json
+git add results/*
 ```
 
 If you have met the performance goals for all of the kernels, you may submit your kernel for full credit. See the [Submission Step](#step-3-submission) for more details. 
 
 > [!IMPORTANT]
 >
-> The competition winners will be decided based on the best performance on the full fleet of tests, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further. 
+> The competition winners will be decided based on the best performance on the full fleet of tests, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further. We may rerun kernels on a larger fleet of tests to decide the competition winners, so make sure that your kernel can handle various ranges input parameters.
 
 > [!WARNING]
 >
-> The script will also output the performance results to `results/execution_times.json`, which will be used to track the leaderboard during the initial weeks of the competition. Do not modify this file before submitting -- **any attempt to tamper with results will be considered an act of academic dishonesty and impact your grade for the course**. We will rerun submissions in the final weeks of the competition to verify that your submission met the performance requirements, and we will also update the leaderboard accordingly.
+> The script will also output results to files in `results/`, which will be used to grade your submission and track the leaderboard during the initial weeks of the competition. Do not modify these files before submitting -- **any attempt to tamper with results will be considered an act of academic dishonesty and impact your grade for the course**. We will rerun submissions in the final weeks of the competition to verify that your submission met the performance requirements, and we will update the leaderboard accordingly.
 
 #### Debugging and Optimizing Tips using Neuron Profile
 If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements in your performance by simply ensuring your kernel maps properly to the hardware parameters and architecture details.

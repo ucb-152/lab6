@@ -40,21 +40,17 @@ basic_test_cases = {
 
 fleet_test_cases = {
     "in128_out128_filter3x3_batch16_256x256_float16": 13000,
-    "in128_out128_filter5x5_batch16_256x256_float16": 16000,
-
+    "in128_out128_filter5x5_batch16_32x32_float16": 1000,
     "in128_out256_filter3x3_batch4_32x32_float32": 1000,
     "in128_out256_filter3x3_batch4_256x256_float16": 7000,
-    "in128_out256_filter3x3_batch16_32x32_float32": 4000,
-    "in128_out256_filter3x3_batch16_256x256_float16": 30000,
-
+    "in128_out256_filter3x3_batch16_32x32_float32": 3000,
+    "in128_out256_filter3x3_batch64_32x32_float16": 8000,
     "in128_out256_filter5x5_batch4_32x32_float32": 3000,
-    "in128_out256_filter5x5_batch4_256x256_float16": 12000,
     "in128_out256_filter5x5_batch16_32x32_float16": 2000,
-
-    "in256_out256_filter3x3_batch4_32x32_float16": 1000,
-    "in256_out256_filter3x3_batch4_256x256_float16": 10000,
+    "in256_out256_filter3x3_batch4_32x32_float32": 3000,
     "in256_out256_filter3x3_batch16_32x32_float16": 3000,
-    
-    "in256_out256_filter5x5_batch4_32x32_float16": 1000,
+    "in256_out256_filter3x3_batch64_32x32_float16": 10000,
+    "in256_out256_filter5x5_batch4_32x32_float32": 5000,
     "in256_out256_filter5x5_batch16_32x32_float16": 4000,
+    "in256_out256_filter5x5_batch64_32x32_float16": 12000,
 }

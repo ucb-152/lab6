@@ -20,8 +20,8 @@ def benchmark_nki(nki_func, *args, **kwargs):
     bench_func = nki.benchmark(warmup=5, iters=10)(nki_func)
     bench_func(*args, **kwargs)
     latency_res = bench_func.benchmark_result.nc_latency
-    p99 = latency_res.get_latency_percentile(99)
-    print("Latency: {:.2f} ms (P99)".format(p99 / 1000.0))
+    exec_time = latency_res.get_latency_percentile(50)
+    print("Execution Time: {:.2f} ms ".format(exec_time / 1000.0))
 
 if __name__ == "__main__":
     # Parse command-line arguments
