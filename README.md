@@ -5,11 +5,13 @@ The goal of this laboratory assignment is to give you an opportunity to program 
 
 It is important to learn how to optimize programs to take full advantage of the memory and compute engines available on the target hardware. There are many factors to consider when designing a kernel, such as the communication between compute engines and memory, the amount of data a compute engine can work on at a given time, the dependencies between different computations in your kernel, and more. By the end of this lab, you should be able to program basic kernels on [NeuronCore](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/arch/neuron-hardware/neuron-core-v2.html#neuroncores-v2-arch), the main accelerator device in [AWS Tranium](https://aws.amazon.com/ai/machine-learning/trainium/) machines.
 
-There are two sections of the lab, the Directed and Open-Ended Portions. The Directed Portion is intended to familiarize you with programming for the Tranium accelerator, while the Open-Ended portion will allow you to explore optimizing your programs to get maximal performance out of the hardware. There will be many links to documentation during the lab, and we **highly** recommend you do your best to read them thoroughly. It will be difficult to program the accelerator, and more importantly, it will be tough to optimize your programs without background context.
+There are two sections of the lab, the Directed and Open-Ended Portions. The Directed Portion is intended to familiarize you with programming for the Tranium accelerator, while the Open-Ended portion will allow you to explore optimizing your programs to get maximal performance out of the hardware. The Open-Ended submissions will automatically be entered into a leaderboard. We will be running a competition, and the most performant kernels will win prizes!
 
 > [!NOTE]
 >
-> This lab was made possible with the support of AWS, and they will be awarding prizes to the students with the most optimal programs! See the [Open-Ended Prizes](#prizes) section for more details.
+> This lab was made possible with the support of AWS, and they will be awarding prizes to the students with the most optimal kernels! See the [Open-Ended Prizes](#prizes) section for more details.
+
+There will be many links to documentation during the lab, and we **highly** recommend you do your best to read them thoroughly. It will be difficult to program the accelerator, and more importantly, it will be tough to optimize your programs without background context.
 
 
 ### Graded Items:
@@ -41,6 +43,8 @@ Systolic arrays are good for kernels like matrix multiplication. From the animat
   <br>
   <a href="https://medium.com/lightmatter/matrix-processing-with-nanophotonics-998e294dabc1">Source</a>
 </p>
+
+For more details on systolic arrays, please watch and review the [Specialization lecture](https://inst.eecs.berkeley.edu/~cs152/sp25/).
 
 
 ### Tranium Overview
@@ -472,11 +476,20 @@ Read the instructions in [NEURON_PROFILE.md](/NEURON_PROFILE.md) for more inform
 ### Step 3: Submission
 Once you have successfully completed the steps above, you are finished with the Open-Ended portion! Make sure your changes have been pushed to your repository, then go to the Open-Ended assignment on [Gradescope](https://www.gradescope.com/courses/959486), and select your GitHub repository to submit your code. Your submission will automatically be added to the leaderboard.
 
-## Feedback Form
-As the final step for this Lab, please fill out this [Lab Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSdMDX6pdLr19Jmt5v1oP8FOTj4GVqGNUjp8Iu4oV7ydT4ZGCg/viewform?usp=header). There will also be space for you to mention any feedback for the previous labs, which we especially encourage for Lab 4 and 5 since there was not a dedicated feedback question for those assignments.
+## Final Steps
+
+### Feedback Form
+As the final graded item for this Lab, please fill out this [Lab Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSdMDX6pdLr19Jmt5v1oP8FOTj4GVqGNUjp8Iu4oV7ydT4ZGCg/viewform?usp=header). There will also be space for you to mention any feedback for the previous labs, which we especially encourage for Lab 4 and 5 since there was not a dedicated feedback question for those assignments.
+
+### Teardown your AWS resources
+Finally, follow the [AWS_TEARDOWN](/AWS_TEARDOWN.md) guide to release the resouces you used during the lab. You are free to use up the remaining credits you have and experiment further with Tranium, but any charges to your card are your own responsibility.
+
+> [!WARNING]
+> 
+> Do NOT forget to complete this step!
 
 ## Conclusion
 Congrats on finishing Lab 6! In this lab, you explored the architecture and programming of ML accelerators, specifically the AWS Tranium device. You learned about the key components of ML accelerators, such as systolic arrays, memory hierarchies, and specialized compute engines, and how these components are optimized for machine learning workloads. By implementing kernels using the Neuron Kernel Interface (NKI), you gained hands-on experience in mapping ML algorithms to a target hardware, customizing the iteration, computations, memory management, and more to achieve high performance. By completing this lab, you have gained valuable skills in programming domain-specific accelerators, a critical area in modern computing. These skills will be increasingly relevant as the demand for efficient AI and ML solutions continues to grow.
 
 ## Acknowledgements
-The original material for this lab was designed by Ronit Nagarapu in Spring 2025. The Tranium portion of the lab was developed with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments. 
+The original material for this lab was designed by Ronit Nagarapu for the Spring 2025 edition of Berkeley's CS152 course. This lab was made possible with the assistance of AWS & Annapurna Labs and inspired by Stanford's CS149 Tranium assignments. 
