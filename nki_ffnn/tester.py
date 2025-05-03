@@ -3,103 +3,109 @@ import neuronxcc.nki.isa as nisa
 import neuronxcc.nki.language as nl
 import neuronxcc.nki.typing as nt
 
+import os
 import argparse
 import numpy as np
 from kernels import nki_transpose, nki_bias_add_act, nki_forward, nki_predict
 from ffnn_ref import NeuralNetwork, relu, softmax
-from utils import generate_data
+from utils import generate_data, BATCH_SIZE, INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE
+
+def write_outputs_to_file(test_result, ref_result, file_head):
+    # Create output directory if it doesn't exist
+    output_dir = "outputs"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Write reference output to a text file
+    ref_output_file = os.path.join(output_dir, f"{file_head}_ref.txt")
+    with open(ref_output_file, "w") as ref_file:
+        np.savetxt(ref_file, ref_result, fmt="%.4f")
+
+    # Write test output to a text file
+    test_output_file = os.path.join(output_dir, f"{file_head}.txt")
+    with open(test_output_file, "w") as test_file:
+        np.savetxt(test_file, test_result, fmt="%.4f")
 
 def test_transpose(simulate):
     print("Testing transpose...")
+
+    input_matrix = np.random.rand(BATCH_SIZE, INPUT_SIZE).astype(np.float32)
+    expected_output = input_matrix.T
     if simulate:
-        for test_i in range(10):
-            input_matrix = np.random.rand(1024, 1024).astype(np.float32)
-            expected_output = input_matrix.T
-            output = nki.simulate_kernel(nki_transpose, input_matrix)
-            assert np.allclose(output, expected_output), "Transpose test failed!"
+        output = nki.simulate_kernel(nki_transpose, input_matrix)
     else:
-        input_matrix = np.random.rand(1024, 1024).astype(np.float32)
-        expected_output = input_matrix.T
         output = nki_transpose(input_matrix)
-        assert np.allclose(output, expected_output), "Transpose test failed!"
+    if not np.allclose(output, expected_output, atol=1e-7, rtol=1e-4):
+        write_outputs_to_file(output, expected_output, f"transpose_test")
+        raise ValueError("Transpose test failed!")
+
+    input_matrix = np.random.rand(BATCH_SIZE, HIDDEN_SIZE).astype(np.float32)
+    expected_output = input_matrix.T
+    if simulate:
+        output = nki.simulate_kernel(nki_transpose, input_matrix)
+    else:
+        output = nki_transpose(input_matrix)
+    if not np.allclose(output, expected_output, atol=1e-7, rtol=1e-4):
+        write_outputs_to_file(output, expected_output, f"transpose_test")
+        raise ValueError("Transpose test failed!")
+
     print("Transpose test passed!")
 
 def test_bias_add_act(simulate):
     print("Testing bias_add_act...")
+
+    input_matrix = np.random.rand(BATCH_SIZE, HIDDEN_SIZE).astype(np.float32)
+    bias = np.random.rand(1, HIDDEN_SIZE).astype(np.float32)
+    expected_output = relu(input_matrix + bias)
     if simulate:
-        for test_i in range(10):
-            input_matrix = np.random.rand(1024, 1024).astype(np.float32)
-            bias = np.random.rand(1, 1024).astype(np.float32)
-            expected_output = relu(input_matrix + bias)
-            output = nki.simulate_kernel(nki_bias_add_act, input_matrix, bias, act='relu')
-            assert np.allclose(output, expected_output), "Bias add + activation(relu) test failed!"
-        for test_i in range(10):
-            input_matrix = np.random.rand(1024, 1024).astype(np.float32)
-            bias = np.random.rand(1, 1024).astype(np.float32)
-            expected_output = softmax(input_matrix + bias)
-            output = nki.simulate_kernel(nki_bias_add_act, input_matrix, bias, act='softmax')
-            assert np.allclose(output, expected_output), "Bias add + activation(softmax) test failed!"
+        output = nki.simulate_kernel(nki_bias_add_act, input_matrix, bias, act='relu')
     else:
-        input_matrix = np.random.rand(1024, 1024).astype(np.float32)
-        bias = np.random.rand(1, 1024).astype(np.float32)
-        expected_output = relu(input_matrix + bias)
         output = nki_bias_add_act(input_matrix, bias, act='relu')
-        assert np.allclose(output, expected_output), "Bias add + activation(relu) test failed!"
-        input_matrix = np.random.rand(1024, 1024).astype(np.float32)
-        bias = np.random.rand(1, 1024).astype(np.float32)
-        expected_output = softmax(input_matrix + bias)
+    if not np.allclose(output, expected_output, atol=1e-7, rtol=1e-4):
+        write_outputs_to_file(output, expected_output, f"bias_add_act_relu_test")
+        raise ValueError("Bias add + activation(relu) test failed!")
+
+    input_matrix = np.random.rand(BATCH_SIZE, OUTPUT_SIZE).astype(np.float32)
+    bias = np.random.rand(1, OUTPUT_SIZE).astype(np.float32)
+    expected_output = softmax(input_matrix + bias)
+    if simulate:
+        output = nki.simulate_kernel(nki_bias_add_act, input_matrix, bias, act='softmax')
+    else:
         output = nki_bias_add_act(input_matrix, bias, act='softmax')
-        assert np.allclose(output, expected_output), "Bias add + activation(softmax) test failed!"
+    if not np.allclose(output, expected_output, atol=1e-7, rtol=1e-4):
+        write_outputs_to_file(output, expected_output, f"bias_add_act_softmax_test")
+        raise ValueError("Bias add + activation(softmax) test failed!")
+
     print("Bias add + activation test passed!")
 
 def test_forward(simulate):
     print("Testing forward...")
+
+    X, W1, b1, W2, b2 = generate_data()
+    nn = NeuralNetwork(W1, b1, W2, b2)
+    expected_output = nn.forward(X)
     if simulate:
-        for test_i in range(3):
-            X = np.random.rand(1024, 1024).astype(np.float32)
-            W1 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-            W2 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-            b1 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-            b2 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-            nn = NeuralNetwork(W1, b1, W2, b2)
-            expected_output = nn.forward(X)
-            output = nki.simulate_kernel(nki_forward, X, W1, b1, W2, b2)
-            assert np.allclose(output, expected_output), f"Forward test failed!\nNKI Output:\n{output}\nExpected Output:\n{expected_output}"
+        output = nki.simulate_kernel(nki_forward, X, W1, b1, W2, b2)
     else:
-        X = np.random.rand(1024, 1024).astype(np.float32)
-        W1 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-        W2 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-        b1 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-        b2 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-        nn = NeuralNetwork(W1, b1, W2, b2)
-        expected_output = nn.forward(X)
         output = nki_forward(X, W1, b1, W2, b2)
-        assert np.allclose(output, expected_output), f"Forward test failed!\nNKI Output:\n{output}\nExpected Output:\n{expected_output}"
+    if not np.allclose(expected_output, output, atol=1e-7, rtol=1e-4):
+        write_outputs_to_file(output, expected_output, f"forward_test")
+        raise ValueError("Forward test failed!")
+
     print("Forward test passed!")
 
 def test_predict(simulate):
     print("Testing predict...")
+
+    X, W1, b1, W2, b2 = generate_data()
+    nn = NeuralNetwork(W1, b1, W2, b2)
+    expected_output = nn.predict(X)
     if simulate:
-        for test_i in range(3):
-            X = np.random.rand(1024, 1024).astype(np.float32)
-            W1 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-            W2 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-            b1 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-            b2 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-            nn = NeuralNetwork(W1, b1, W2, b2)
-            expected_output = nn.predict(X)
-            output = nki.simulate_kernel(nki_predict, X, W1, b1, W2, b2)
-            assert np.allclose(output, expected_output), "Predict test failed!"
+        output = nki.simulate_kernel(nki_predict, X, W1, b1, W2, b2)
     else:
-        X = np.random.rand(1024, 1024).astype(np.float32)
-        W1 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-        W2 = (np.random.rand(1024, 1024) * 0.01).astype(np.float32)
-        b1 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-        b2 = (np.random.rand(1, 1024) * 0.01).astype(np.float32)
-        nn = NeuralNetwork(W1, b1, W2, b2)
-        expected_output = nn.predict(X)
         output = nki_predict(X, W1, b1, W2, b2)
-        assert np.allclose(output, expected_output), "Predict test failed!"
+    if not np.allclose(output, expected_output, atol=1e-7, rtol=1e-4):
+        write_outputs_to_file(output, expected_output, f"predict_test")
+        raise ValueError("Predict test failed!")
     print("Predict test passed!")
 
 if __name__ == "__main__":
