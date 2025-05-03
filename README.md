@@ -230,14 +230,19 @@ Fill in the blanks to implement the `nki_transpose` kernel in `kernels.py`.
 - Hint 2: Use `nl.tile_size.pmax` to get the max partition dimension. Remember, the partition dimension is the first index unless otherwise specified ([Representing data in NKI](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/programming_model.html#representing-data-in-nki)).
 - Hint 3: Use iterators to loop through the indices when tiling: [NKI Language (Iterators)](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#iterators)
 
-Once you have completed the kernel, run the following command to confirm your implementation works:
+Once you have completed the kernel, run the following command to confirm your implementation is functionally correct. This will use [`nki.simulate_kernel`](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.simulate_kernel.html) to run your kernel on CPU for an initial check.
+```bash
+python tester.py --test-transpose --simulate
+```
+
+Then, run the following command to compile and run the kernels on NKI. This will compile the code and run it on the NeuronCore hardware, so it will employ more restrictive checks to make sure you are abiding by the API and hardware limitations.
 ```bash
 python tester.py --test-transpose
 ```
 
-If you are not passing the tests, make sure to read the documentation carefully for the limits and restrictions on various NKI APIs. 
+If you are not passing the tests, make sure to read the documentation carefully for the limits and restrictions on various NKI APIs. Especially on the non-simulated version of the test, you may run into errors with the compiler, usually due to looping, indexing, and calling NKI APIs in ways that are not supported.
 
-You may also wish to print your intermediate tensor values within the NKI kernel. While this is not possible when running the kernel on Tranium, the `tester.py` script uses the `nki.simulate_kernel` feature, which enables device printing with [nl.device_print](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html). Thus, you can put nl.device_print statements in your kernel if you are testing via the `tester.py` script.
+You may also wish to print your intermediate tensor values within the NKI kernel. Running the kernel with the `--simulate` flag will enable device printing with [`nl.device_print`](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/generated/nki.language.device_print.html) (make sure to read the function signature as you have to pass two seperate arguments, the string you want to prefix and the tensor you want to output). Thus, you can put `nl.device_print` statements in your kernel if you are running the test with `--simulate`. Make sure to comment out these `nl.device_print` statements when running without the `--simulate` flag.
 
 
 ### Step 4: Program the nki_bias_add_act kernel
@@ -247,7 +252,10 @@ Fill in the blanks to implement the `nki_bias_add_act` kernel in `kernels.py`.
 - Hint 1: Many of the [NKI math operations](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#math-operations) allow for the operands to have different dimensions, as long as one can be broadcasted into the other.
 - Hint 2: Most common activation functions are available in the [NKI math operations](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.language.html#math-operations)
 
-Once you have completed the kernel, run the following command to confirm your implementation works:
+Once you have completed the kernel, run the following commands to confirm your implementation works:
+```bash
+python tester.py --test-bias-add-act --simulate
+```
 ```bash
 python tester.py --test-bias-add-act
 ```
@@ -257,7 +265,10 @@ Similar to the reference numpy model, this kernel will combine the transpose, ma
 
 Fill in the blanks to implement the `nki_forward` kernel in `kernels.py`. 
 
-Once you have completed the kernel, run the following command to confirm your implementation works:
+Once you have completed the kernel, run the following commands to confirm your implementation works:
+```bash
+python tester.py --test-forward --simulate
+```
 ```bash
 python tester.py --test-forward
 ```
@@ -273,7 +284,10 @@ Follow the steps above to implement the `nki_predict` kernel in `kernels.py`.
 - Hint 1: You don't need to program much for Step 1
 - Hint 2: You may need to break Step 2 into two separate steps: 1) identify the max values and 2) identify the indices of the max values. Both of the NKI APIs you need for this can be found in the [NKI ISA manual](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/general/nki/api/nki.isa.html).
 
-Once you have completed the kernel, run the following command to confirm your implementation works:
+Once you have completed the kernel, run the following commands to confirm your implementation works:
+```bash
+python tester.py --test-predict --simulate
+```
 ```bash
 python tester.py --test-predict
 ```
