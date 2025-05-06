@@ -34,8 +34,9 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
     else:
         raise ValueError("Please specify either basic_fleet, full_fleet, or test_case.")
 
-    execution_times = defaultdict(dict)
+    report_data = defaultdict(dict)
 
+    correctness_passed = True
     for test_case in test_cases.keys():
         params = test_case_params(test_case)
         input_channels, output_channels, filter_size, batch_size, image_dims, dtype = params
@@ -45,7 +46,7 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
         W = np.random.rand(output_channels, input_channels, filter_size, filter_size).astype(dtype)
         bias = np.random.rand(output_channels).astype(dtype)
         et = time.time()
-        execution_times[test_case]['gen_data'] = et-st
+        report_data[test_case]['gen_data'] = et-st
 
         args = [X, W, bias]
 
@@ -54,17 +55,19 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
         st = time.time()
         test_result = kernel(*args)
         et = time.time()
-        execution_times[test_case]['exec_time'] = et-st
+        report_data[test_case]['exec_time'] = et-st
 
         st = time.time()
         ref_results = ref_kernel(*args)
         et = time.time()
-        execution_times[test_case]['ref_exec_time'] = et-st
+        report_data[test_case]['ref_exec_time'] = et-st
 
         rtol = dtype_tol[dtype]["rtol"]
         atol = dtype_tol[dtype]["atol"]
 
         if not np.allclose(ref_results, test_result, rtol=rtol, atol=atol):
+            report_data[test_case]['correct'] = False
+            correctness_passed = False
             print(f"Failed, writing to file...")
 
             file_head = params_name(params)
@@ -92,27 +95,35 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
                         test_file.write(f"** Output Channel {channel_idx}:\n")
                         np.savetxt(test_file, test_result[img_idx, channel_idx], fmt="%.4f")
                         test_file.write("\n")
-
-            return False
         else:
+            report_data[test_case]['correct'] = True
             print("Passed!")
 
-    if basic_fleet:
-        print("All basic correctness tests passed!\n")
-    elif full_fleet:
-        print("Full correctness test fleet passed!\n")
-    elif test_case:
-        print(f"{test_case} correctness test passed!\n")
+    if correctness_passed:
+        if basic_fleet:
+            print("All basic correctness tests passed!\n")
+        elif full_fleet:
+            print("Full correctness test fleet passed!\n")
+        elif test_case:
+            print(f"{test_case} correctness test passed!\n")
 
     if record:
-        output_dir = "results"
+        output_dir = "reports"
         os.makedirs(output_dir, exist_ok=True)
-        exec_time_file = os.path.join(output_dir, "correctness_tests_report.json")
-        with open(exec_time_file, "w") as f:
-            json.dump(execution_times, f, indent=4)
 
-    return True
+        if basic_fleet:
+            report_name = f"basic_correctness_test_report"
+        elif full_fleet:
+            report_name = f"fleet_correctness_test_report"
+        elif test_case:
+            report_name = f"{test_case}_correctness_test_report"
 
+        report_file = os.path.join(output_dir, f"{report_name}.json")
+        print(f"Writing correctness report to {report_file}")
+        with open(report_file, "w") as f:
+            json.dump(report_data, f, indent=4)
+
+    return correctness_passed
 
 def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, test_case=None, profile=False, record=False):
     if basic_fleet:
@@ -124,8 +135,9 @@ def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
     else:
         raise ValueError("Please specify either basic_fleet, full_fleet, or test_case.")
 
-    execution_times = defaultdict(dict)
+    report_data = defaultdict(dict)
 
+    performance_passed = True
     for test_case in test_cases.keys():
         params = test_case_params(test_case)
         input_channels, output_channels, filter_size, batch_size, image_dims, dtype = params
@@ -135,7 +147,7 @@ def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
         W = np.random.rand(output_channels, input_channels, filter_size, filter_size).astype(dtype)
         bias = np.random.rand(output_channels).astype(dtype)
         et = time.time()
-        execution_times[test_case]['gen_data'] = et-st
+        report_data[test_case]['gen_data'] = et-st
 
         args = [X, W, bias]
 
@@ -156,33 +168,42 @@ def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
             )(kernel)
             bench_func(*args)
         et = time.time()
-        execution_times[test_case]['exec_time'] = et-st
+        report_data[test_case]['exec_time'] = et-st
         
         exec_time = bench_func.benchmark_result.nc_latency.get_latency_percentile(50)
         performance_requirement = test_cases[test_case]
         if exec_time > performance_requirement:
             print(f"Failed :( Executed in {exec_time} μs")
-            print(f"Performance requirement not met: need to be under {performance_requirement} μs ")
-            return False
+            print(f"Performance requirement not met: need to be under {performance_requirement} μs")
+            report_data[test_case]['met_threshold'] = False
+            performance_passed = False
         else:
             print(f"Passed! Executed in {exec_time} μs\n")
-        execution_times[test_case]['benchmark_time'] = exec_time
+            report_data[test_case]['met_threshold'] = True
+        report_data[test_case]['benchmark_time'] = exec_time
 
-    if basic_fleet:
-        print("All basic performance tests passed!\n")
-    elif full_fleet:
-        print("Full performance test fleet passed!\n")
-    elif test_case:
-        print(f"{test_case} performance test passed!\n")
+    if performance_passed:
+        if basic_fleet:
+            print("All basic performance tests passed!\n")
+        elif full_fleet:
+            print("Full performance test fleet passed!\n")
+        elif test_case:
+            print(f"{test_case} performance test passed!\n")
 
     if record:
-        output_dir = "results"
+        output_dir = "reports"
         os.makedirs(output_dir, exist_ok=True)
-        exec_time_file = os.path.join(output_dir, "performance_test_report.json")
-        with open(exec_time_file, "w") as f:
-            json.dump(execution_times, f, indent=4)
 
-    return True
+        if basic_fleet:
+            report_name = f"basic_performance_test_report"
+        elif full_fleet:
+            report_name = f"fleet_performance_test_report"
+        elif test_case:
+            report_name = f"{test_case}_performance_test_report"
+
+        report_file = os.path.join(output_dir, f"{report_name}.json")
+        with open(report_file, "w") as f:
+            json.dump(report_data, f, indent=4)
 
 def simulate_kernel_wrapper(kernel):
     def temp_func(*args, **kwargs):
@@ -238,37 +259,28 @@ if __name__ == "__main__":
     # Correctness tests
     if args.test_case:
         test_result = test_correctness_conv2d_kernel(conv2d, test_case=args.test_case, record=args.record)
-        if test_result == False:
-            exit()
-    else:
+    elif args.basic:
         print("Running basic correctness tests for conv2d kernel...")
-        test_result = test_correctness_conv2d_kernel(conv2d, basic_fleet=True, record=(args.record and args.basic))
-        if test_result == False:
-            exit()
-
-        if not args.basic:
-            print("Running full fleet of correctness tests for conv2d kernel...")
-            test_result = test_correctness_conv2d_kernel(conv2d, full_fleet=True, record=args.record)
-            if test_result == False:
-                exit()
+        test_result = test_correctness_conv2d_kernel(conv2d, basic_fleet=True, record=args.record)
+    else:
+        print("Running full fleet of correctness tests for conv2d kernel...")
+        test_result = test_correctness_conv2d_kernel(conv2d, full_fleet=True, record=args.record)
+    
 
     # Performance tests
     if not args.simulate:
-        if args.test_case:
-            test_result = test_performance_conv2d_kernel(conv2d, test_case=args.test_case, profile=args.profile, record=args.record)
-            if test_result == False:
-                exit()
-        else:
-            print("Running basic performance tests for conv2d kernel...")
-            test_result = test_performance_conv2d_kernel(conv2d, basic_fleet=True, profile=args.profile, record=(args.record and args.basic))
-            if test_result == False:
-                exit()
+        if test_result == False:
+            print("\nSkipping performance test(s) due to failed correctness test(s)")
+            exit()
 
-            if not args.basic:
-                print("Running full fleet of performance tests for conv2d kernel...")
-                test_result = test_performance_conv2d_kernel(conv2d, full_fleet=True, profile=args.profile, record=args.record)
-                if test_result == False:
-                    exit()
+        if args.test_case:
+            test_performance_conv2d_kernel(conv2d, test_case=args.test_case, profile=args.profile, record=args.record)
+        elif args.basic:
+            print("Running basic performance tests for conv2d kernel...")
+            test_performance_conv2d_kernel(conv2d, basic_fleet=True, profile=args.profile, record=args.record)
+        else:
+            print("Running full fleet of performance tests for conv2d kernel...")
+            test_performance_conv2d_kernel(conv2d, full_fleet=True, profile=args.profile, record=args.record)
 
         if args.profile:
             print("Profiling conv2d kernels...")
