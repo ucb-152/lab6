@@ -36,6 +36,8 @@ dtype_tol = {
 
 basic_test_cases = {
     "in128_out256_filter3x3_batch4_32x32_float32": 1000,
+    "in128_out256_filter3x3_batch4_256x256_float16": 7000,
+    "in256_out256_filter5x5_batch4_32x32_float32": 5000,
 }
 
 fleet_test_cases = {

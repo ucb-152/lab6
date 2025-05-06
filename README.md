@@ -428,23 +428,29 @@ python tester_ref.py --benchmark
 > 
 > The speed of your kernel on NumPy may give some insights on relative performance gain, but ultimately, they won't be accurate to the execution on Tranium with NKI. You should use NumPy brainstorming simply to ensure functional accuracy, and then immediately move to NKI for accurate performance testing and benchmarking. 
 
-
-### Step 2: Program and optimize conv2d
-Develop and optimize the `conv2d_nki` kernel in `conv2d.py`.
+### Step 2: Program conv2d
+Develop and program the `conv2d_nki` kernel in `conv2d.py`.
 
 Run the following command to simulate your kernel and confirm your implementation works functionally on basic tests:
 ```bash
 python tester.py --simulate --basic
 ```
 
-Once you have confirmed functional accuracy, simulate various test cases to ensure your implementation is robust to multiple input parameters. You can simulate specific test cases with the following command. View `utils.py` for the test case options.
-```bash
-python tester.py --simulate --test-case in128_out256_filter5x5_batch16_32x32_float16
-```
-
 Once you have confirmed functional accuracy, benchmark the basic tests to check the kernel's performance. 
 ```bash
 python tester.py --basic
+```
+
+If you have met the performance goals for all of the basic test cases, you may submit your kernel for full credit. You can recieve partial credit if your kernel is functionally correct even if it does not meet the performance threshold. See the [Submission Step](#step-3-submission) for more details. The remaining test cases will be used for the competition.
+
+
+### Step 3: Optimize conv2d
+
+Once you have confirmed functional accuracy and performance for the basic tests, you can move on to testing with the larger test fleet and optimizing your kernel further.
+
+Start by simulating various test cases to ensure your implementation is robust to multiple input parameters. You can simulate specific test cases with the following command. View `utils.py` for the test case options.
+```bash
+python tester.py --simulate --test-case in128_out256_filter5x5_batch16_32x32_float16
 ```
 
 You can also benchmark specific test cases with the following command.
@@ -457,20 +463,11 @@ Finally, run the full fleet of tests with the following command. Add the `--reco
 python tester.py --record
 ```
 
-If the script does not error, you have met the minimum performance requirements on the full fleet of tests! Make sure to add the file to your GitHub repository before submitting to Gradescope.
-```bash
-git add results/*
-```
-
-If you have met the performance goals for all of the kernels, you may submit your kernel for full credit. See the [Submission Step](#step-3-submission) for more details. 
+Once you are done optimizing, you may submit to Gradescope. See the [Submission Step](#step-3-submission) for more details.
 
 > [!IMPORTANT]
 >
 > The competition winners will be decided based on the best performance on the full fleet of tests, so once you meet the minimum requirements, we encourage you to try and optimize your kernel even further. We may rerun kernels on a larger fleet of tests to decide the competition winners, so make sure that your kernel can handle various ranges input parameters.
-
-> [!WARNING]
->
-> The script will also output results to files in `results/`, which will be used to grade your submission and track the leaderboard during the initial weeks of the competition. Do not modify these files before submitting -- **any attempt to tamper with results will be considered an act of academic dishonesty and impact your grade for the course**. We will rerun submissions in the final weeks of the competition to verify that your submission met the performance requirements, and we will update the leaderboard accordingly.
 
 #### Debugging and Optimizing Tips using Neuron Profile
 If you are having trouble meeting the performance requirements, make sure to carefully read the architecture documentation linked in the above sections, especially in the [Tranium Overview](#tranium-overview) section. You will likely see the most improvements in your performance by simply ensuring your kernel maps properly to the hardware parameters and architecture details.
