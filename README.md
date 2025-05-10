@@ -19,12 +19,11 @@ All graded items are to be submitted through [Gradescope](https://www.gradescope
 
 The Directed Portion is due **Friday, May 2 at 11:59PM**. The Open-Ended portion is due **Friday, May 9 at 11:59PM**, after which the competition will be closed and the prizes awarded. 
 
-Finally, after completing the lab, you will need to fill out a feedback form. Failure to fill out the form will result in a penalty to your lab grade. The form helps us improve this lab for future versions of the course, so any feedback, positive or negative, is greatly appreciated!
+Finally, after completing the lab, you will need to fill out a feedback form. The form helps us improve this lab for future versions of the course, so any feedback, positive or negative, is greatly appreciated!
 
 Graded Items:
 - Code for Directed Portion: `nki_ffnn/kernels.py`
 - Code for Open-Ended Portion: `nki_conv2d/conv2d.py`
-- Submission to the feedback form
 
 ## Background:
 ### ML Accelerator Hardware
@@ -490,7 +489,7 @@ Once you have successfully completed the steps above, you are finished with the 
 ## Final Steps
 
 ### Feedback Form
-As the final graded item for this Lab, please fill out this [Lab Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSdMDX6pdLr19Jmt5v1oP8FOTj4GVqGNUjp8Iu4oV7ydT4ZGCg/viewform?usp=header). There will also be space for you to mention any feedback for the previous labs, which we especially encourage for Lab 4 and 5 since there was not a dedicated feedback question for those assignments.
+As the step for this Lab, please fill out this [Lab Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSdMDX6pdLr19Jmt5v1oP8FOTj4GVqGNUjp8Iu4oV7ydT4ZGCg/viewform?usp=header). There will also be space for you to mention any feedback for the previous labs, which we especially encourage for Lab 4 and 5 since there was not a dedicated feedback question for those assignments.
 
 ### Teardown your AWS resources
 Finally, follow the [AWS_TEARDOWN](/AWS_TEARDOWN.md) guide to release the resouces you used during the lab. You are free to use up the remaining credits you have and experiment further with Tranium, but any charges to your card are your own responsibility.
