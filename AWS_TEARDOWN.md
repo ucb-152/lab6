@@ -1,4 +1,4 @@
-# AWS Setup Instructions
+# AWS Teardown Instructions
 This document will help you free up all of the resources you allocated during the lab. Please follow these directions carefully to prevent extra charges to your account. 
 
 ## Terminate your Trn1 Instance
