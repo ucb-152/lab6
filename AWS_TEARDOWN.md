@@ -1,5 +1,5 @@
 # AWS Teardown Instructions
-This document will help you free up all of the resources you allocated during the lab. Please follow these directions carefully to prevent extra charges to your account. 
+This document will help you free up all of the resources you allocated during the lab. Please follow these directions carefully to prevent extra charges to your account. Make sure to check all the AWS regions you used during the lab (i.e. us-west-2, us-east-2, etc). Most students will have only created resources in us-east-2 region, but as a precaution, check all of the regions.
 
 ## Terminate your Trn1 Instance
 The first step is to terminate your trn1 instance. Go to [Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances) in your AWS console, select your trn1_cs152 instance, click "Instance state", and click "Terminate (delete) instance."
@@ -16,7 +16,7 @@ Next, you need to free your elastic IP. Go to [Elastic IPs](https://us-east-2.co
 </p>
 
 ## Delete Cloudwatch Alarm
-Then, you need to remove the Cloudwatch alarm you set up for auto-shutdown. Go to [CloudWatch Alarms](https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#alarmsV2), select your alarm, click "Actions", and click "Delete."
+Then, you need to remove the Cloudwatch alarm you set up for auto-shutdown. Go to [CloudWatch Alarms](https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#alarmsV2), select your alarm, click "Actions", and click "Delete." If your alarm was automatically deleted when terminating the instance, this step may not be necessary.
 
 <p align="center">
   <img width="70%" src="./img/aws_teardown/delete_alarm.png">
