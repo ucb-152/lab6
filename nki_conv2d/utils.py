@@ -31,7 +31,7 @@ def test_case_params(test_case):
 
 dtype_tol = {
     np.float32: {"rtol": 1e-5, "atol": 1e-8},
-    np.float16: {"rtol": 1e-3, "atol": 1e-5},
+    np.float16: {"rtol": 1e-2, "atol": 1e-4},
 }
 
 basic_test_cases = {

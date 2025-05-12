@@ -44,7 +44,7 @@ def test_correctness_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
         st = time.time()
         X = np.random.rand(batch_size, input_channels, image_dims[0], image_dims[1]).astype(dtype)
         W = np.random.rand(output_channels, input_channels, filter_size, filter_size).astype(dtype)
-        bias = np.random.rand(output_channels).astype(dtype)
+        bias = (np.random.rand(output_channels)*50).astype(dtype)
         et = time.time()
         report_data[test_case]['gen_data'] = et-st
 
@@ -145,7 +145,7 @@ def test_performance_conv2d_kernel(kernel, basic_fleet=False, full_fleet=False, 
         st = time.time()
         X = np.random.rand(batch_size, input_channels, image_dims[0], image_dims[1]).astype(dtype)
         W = np.random.rand(output_channels, input_channels, filter_size, filter_size).astype(dtype)
-        bias = np.random.rand(output_channels).astype(dtype)
+        bias = (np.random.rand(output_channels)*50).astype(dtype)
         et = time.time()
         report_data[test_case]['gen_data'] = et-st
 
