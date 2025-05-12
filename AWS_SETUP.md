@@ -1,6 +1,10 @@
 # AWS Setup Instructions
 This document will help you launch a Tranium EC2 instance, configure SSH groups to allow you to connect to the instance, and set up auto-shutdown and budget notifications so you don't accidentally burn through your credits. These setup steps may seem tedious, but they will provide you with valuable experience in setting up cloud computing infrastructure, which you will likely run into in future career and research opportunities.
 
+> [!WARNING]
+>
+> Make sure to complete these steps in one sitting, or else you may leave your instance running and get charged.
+
 ## Step 1: Launch Instance
 The first step is to launch a Tranium EC2 instance.
 
@@ -70,7 +74,7 @@ If you get an error saying your "Instance launch failed" due to requesting more 
 
 
 ## Step 2: Setup Elastic IPs
-This next step is to set up an Elastic IP for your instance. By default, the IPv4 associated with an instance changes each time you launch it. This is quite annoying since you will need to stop and start the instance constantly to save costs and credit usage. By allocating an Elastic IP and associating it with the instance, we avoid having to change your SSH config each time. 
+This next step is to set up an Elastic IP for your instance. By default, the IPv4 associated with an instance changes each time you launch it. This is quite annoying since you will need to stop and start the instance constantly to save costs and credit usage. By allocating an Elastic IP and associating it with the instance, you avoid having to change your SSH config each time. 
 1. After clicking "Launch Instance" from the previous step, go back to the [EC2 dashboard](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Home). Scroll down on the left side of the screen until you get to "Network & Security" settings, and click on Elastic IPs.
 2. Click the orange "Allocate Elastic IP address" button in the top-right corner of the screen
 3. Click the orange "Allocate" button. Now, you have an Elastic IP to use.
